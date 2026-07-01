@@ -104,6 +104,11 @@ function setupGlobalControls() {
         if (closeHelp) closeHelp.addEventListener('click', () => helpBackdrop.classList.add('hidden'));
         helpBackdrop.addEventListener('click', (e) => { if (e.target === helpBackdrop) helpBackdrop.classList.add('hidden'); });
     }
+    
+    // Mencegah recursion event bubbling pada semua input file saat upload zone diklik
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('click', (e) => e.stopPropagation());
+    });
 }
 
 function setupEditorControls() {
@@ -114,6 +119,7 @@ function setupEditorControls() {
     const exportBtn = document.getElementById('exportBtn');
     
     if (editorInput && editorDrop) {
+        editorInput.addEventListener('click', (e) => e.stopPropagation());
         editorInput.addEventListener('change', (e) => handleEditorFileSelect(e.target.files[0]));
         
         editorDrop.addEventListener('dragover', (e) => { e.preventDefault(); editorDrop.classList.add('dragover'); });
