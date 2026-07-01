@@ -120,7 +120,7 @@ function setupEditorControls() {
     
     if (editorInput && editorDrop) {
         editorInput.addEventListener('click', (e) => e.stopPropagation());
-        editorInput.addEventListener('change', (e) => handleEditorFileSelect(e.target.files[0]));
+        editorInput.addEventListener('change', (e) => { handleEditorFileSelect(e.target.files[0]); e.target.value = ''; });
         
         editorDrop.addEventListener('dragover', (e) => { e.preventDefault(); editorDrop.classList.add('dragover'); });
         editorDrop.addEventListener('dragleave', (e) => { e.preventDefault(); editorDrop.classList.remove('dragover'); });
@@ -251,7 +251,7 @@ function setupEditorControls() {
     const executeMergeBtn = document.getElementById('executeMergeBtn');
     
     if (mergeInput && mergeDrop) {
-        mergeInput.addEventListener('change', (e) => handleMergeFilesSelect(e.target.files));
+        mergeInput.addEventListener('change', (e) => { handleMergeFilesSelect(e.target.files); e.target.value = ''; });
         mergeDrop.addEventListener('dragover', (e) => { e.preventDefault(); mergeDrop.classList.add('dragover'); });
         mergeDrop.addEventListener('dragleave', (e) => { e.preventDefault(); mergeDrop.classList.remove('dragover'); });
         mergeDrop.addEventListener('drop', (e) => {
@@ -268,7 +268,7 @@ function setupEditorControls() {
     const executeRemoveBtn = document.getElementById('executeRemovePagesBtn');
     
     if (pagesInput && pagesDrop) {
-        pagesInput.addEventListener('change', (e) => handlePagesFileSelect(e.target.files[0]));
+        pagesInput.addEventListener('change', (e) => { handlePagesFileSelect(e.target.files[0]); e.target.value = ''; });
         pagesDrop.addEventListener('dragover', (e) => { e.preventDefault(); pagesDrop.classList.add('dragover'); });
         pagesDrop.addEventListener('dragleave', (e) => { e.preventDefault(); pagesDrop.classList.remove('dragover'); });
         pagesDrop.addEventListener('drop', (e) => {
@@ -284,7 +284,7 @@ function setupEditorControls() {
     const compressDrop = document.getElementById('compressDropZone');
     
     if (compressInput && compressDrop) {
-        compressInput.addEventListener('change', (e) => handleCompressFileSelect(e.target.files[0]));
+        compressInput.addEventListener('change', (e) => { handleCompressFileSelect(e.target.files[0]); e.target.value = ''; });
         compressDrop.addEventListener('dragover', (e) => { e.preventDefault(); compressDrop.classList.add('dragover'); });
         compressDrop.addEventListener('dragleave', (e) => { e.preventDefault(); compressDrop.classList.remove('dragover'); });
         compressDrop.addEventListener('drop', (e) => {
@@ -305,7 +305,7 @@ function setupEditorControls() {
     const executeConvertBtn = document.getElementById('executeConvertBtn');
     
     if (converterInput && converterDrop) {
-        converterInput.addEventListener('change', (e) => handleConverterFileSelect(e.target.files));
+        converterInput.addEventListener('change', (e) => { handleConverterFileSelect(e.target.files); e.target.value = ''; });
         converterDrop.addEventListener('dragover', (e) => { e.preventDefault(); converterDrop.classList.add('dragover'); });
         converterDrop.addEventListener('dragleave', (e) => { e.preventDefault(); converterDrop.classList.remove('dragover'); });
         converterDrop.addEventListener('drop', (e) => {

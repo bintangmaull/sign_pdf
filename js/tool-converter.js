@@ -18,6 +18,7 @@ function setConverterMode(mode) {
     const listEl = document.getElementById('converterFilesList');
     const actionBtn = document.getElementById('executeConvertBtn');
     
+    if (inputEl) inputEl.value = '';
     if (listEl) listEl.innerHTML = '';
     if (emptyEl) emptyEl.classList.remove('hidden');
     if (actionBtn) {
@@ -53,44 +54,51 @@ async function handleConverterFileSelect(files) {
     const emptyEl = document.getElementById('converterEmptyState');
     const actionBtn = document.getElementById('executeConvertBtn');
     
-    if (state.converterMode === 'pdf-to-img' || state.converterMode === 'pdf-to-word') {
-        const file = files[0];
-        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-            showToast('Harap pilih file berformat PDF!', 'error');
-            return;
-        }
-        state.docName = file.name;
-        const buffer = await file.arrayBuffer();
-        state.rawBuffer = buffer.slice(0);
-        
-        if (emptyEl) emptyEl.classList.add('hidden');
-        if (listEl) {
-            listEl.innerHTML = `
-                <div class="doc-info-card" style="margin-top: 1rem;">
-                    <div class="doc-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                    <div class="doc-details">
-                        <h3>${file.name}</h3>
-                        <span>${formatBytes(file.size)} • Siap dikonversi</span>
-                    </div>
-                </div>
-            `;
-        }
-        if (actionBtn) actionBtn.disabled = false;
-    } else if (state.converterMode === 'img-to-pdf') {
-        for (let i = 0; i < files.length; i++) {
-            const f = files[i];
-            if (!f.type.startsWith('image/') && !/\.(png|jpg|jpeg|webp)$/i.test(f.name)) {
-                showToast(`File "${f.name}" bukan gambar, dilewatkan.`, 'error');
-                continue;
+    try {
+        if (state.converterMode === 'pdf-to-img' || state.converterMode === 'pdf-to-word') {
+            const file = files[0];
+            if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                showToast('Harap pilih file berformat PDF!', 'error');
+                return;
             }
-            state.convertImages.push(f);
-        }
-        
-        if (state.convertImages.length > 0) {
+            state.docName = file.name;
+            const buffer = await file.arrayBuffer();
+            state.rawBuffer = buffer.slice(0);
+            
             if (emptyEl) emptyEl.classList.add('hidden');
-            renderConvertImagesList();
+            if (listEl) {
+                listEl.innerHTML = `
+                    <div class="doc-info-card" style="margin-top: 1rem;">
+                        <div class="doc-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                        <div class="doc-details">
+                            <h3>${file.name}</h3>
+                            <span>${formatBytes(file.size)} • Siap dikonversi (${state.converterMode === 'pdf-to-word' ? 'Ke Word .doc' : 'Ke Gambar'})</span>
+                        </div>
+                    </div>
+                `;
+            }
             if (actionBtn) actionBtn.disabled = false;
+            showToast(`Dokumen "${file.name}" berhasil dimuat siap dikonversi!`, 'success');
+        } else if (state.converterMode === 'img-to-pdf') {
+            for (let i = 0; i < files.length; i++) {
+                const f = files[i];
+                if (!f.type.startsWith('image/') && !/\.(png|jpg|jpeg|webp)$/i.test(f.name)) {
+                    showToast(`File "${f.name}" bukan gambar, dilewatkan.`, 'error');
+                    continue;
+                }
+                state.convertImages.push(f);
+            }
+            
+            if (state.convertImages.length > 0) {
+                if (emptyEl) emptyEl.classList.add('hidden');
+                renderConvertImagesList();
+                if (actionBtn) actionBtn.disabled = false;
+                showToast(`${state.convertImages.length} gambar siap dikonversi ke PDF!`, 'success');
+            }
         }
+    } catch (err) {
+        console.error('Error in handleConverterFileSelect:', err);
+        showToast('Gagal memuat dokumen: ' + err.message, 'error');
     }
 }
 
