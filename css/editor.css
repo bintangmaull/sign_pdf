@@ -1,0 +1,382 @@
+/* ==========================================================================
+   PDF Editor Pro - Interactive Editor Styles (Canvas, Overlays, Signatures)
+   ========================================================================== */
+
+/* Viewer Toolbar */
+.viewer-toolbar {
+    height: 54px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.toolbar-left, .toolbar-center, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-controls, .zoom-controls, .rotate-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.page-indicator {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.page-input {
+    width: 45px;
+    padding: 0.2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.viewer-status {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Viewer Viewport */
+.viewer-viewport {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 10%, transparent 10%), var(--bg-main);
+    background-size: 20px 20px;
+}
+
+/* Empty State */
+.viewer-empty-state {
+    text-align: center;
+    max-width: 450px;
+    padding: 2rem;
+}
+
+.empty-illustration {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--primary);
+}
+
+.circle-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--primary-glow);
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(10px);
+    animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from { transform: scale(0.9); opacity: 0.5; }
+    to { transform: scale(1.1); opacity: 0.9; }
+}
+
+.viewer-empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.viewer-empty-state p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.quick-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.q-feat {
+    font-size: 0.82rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.q-feat i {
+    color: var(--success);
+}
+
+/* Canvas Wrapper & Interactive Overlays */
+.canvas-wrapper {
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    border-radius: 4px;
+    background: #ffffff;
+    transition: transform 0.1s ease-out;
+}
+
+#docCanvas {
+    display: block;
+    max-width: none;
+}
+
+.overlays-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Overlay Item (Signature, Text, Stamp) */
+.sig-overlay-item, .text-overlay-item, .stamp-overlay-item {
+    position: absolute;
+    border: 2px dashed transparent;
+    cursor: move;
+    pointer-events: auto;
+    user-select: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sig-overlay-item:hover, .text-overlay-item:hover, .stamp-overlay-item:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.sig-overlay-item.selected, .text-overlay-item.selected, .stamp-overlay-item.selected {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.sig-overlay-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.text-overlay-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    text-align: center;
+    word-break: break-word;
+    pointer-events: none;
+}
+
+/* Stamp Overlay Styles */
+.stamp-overlay-item .stamp-box {
+    border: 3px solid currentColor;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Overlay Controls (Delete & Resize Handles) */
+.overlay-btn-delete {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    background: var(--danger);
+    color: #ffffff;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+}
+
+.overlay-resize-handle {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    background: var(--primary);
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    display: none;
+    cursor: se-resize;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+}
+
+.sig-overlay-item.selected .overlay-btn-delete,
+.sig-overlay-item.selected .overlay-resize-handle,
+.text-overlay-item.selected .overlay-btn-delete,
+.text-overlay-item.selected .overlay-resize-handle,
+.stamp-overlay-item.selected .overlay-btn-delete,
+.stamp-overlay-item.selected .overlay-resize-handle {
+    display: flex;
+}
+
+/* Saved Signatures List & Stamp Tools */
+.signatures-list, .stamps-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.stamps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.stamp-btn {
+    padding: 0.6rem;
+    border: 2px solid currentColor;
+    border-radius: 6px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    text-align: center;
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.stamp-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-sm);
+}
+
+.sig-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.sig-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    transform: translateX(3px);
+}
+
+.sig-card-img {
+    height: 40px;
+    max-width: 180px;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.delete-sig-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.4rem;
+    transition: var(--transition);
+}
+.delete-sig-btn:hover {
+    color: var(--danger);
+}
+
+/* Font Cards */
+.font-preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.font-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.font-card:hover, .font-card.active {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.font-sample {
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.style-great-vibes { font-family: 'Great Vibes', cursive; }
+.style-pacifico { font-family: 'Pacifico', cursive; }
+.style-caveat { font-family: 'Caveat', cursive; }
+.style-dancing { font-family: 'Dancing Script', cursive; }
+
+.font-name {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

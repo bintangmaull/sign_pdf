@@ -1,0 +1,228 @@
+/* ==========================================================================
+   PDF Editor Pro - Special Tools Styles (Merge, Compress, Remove Pages)
+   ========================================================================== */
+
+/* Generic Tool Workspace Container */
+.tool-workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.tool-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tool-header-left h2 {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tool-header-left p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Merge PDF Tool */
+.merge-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto 2rem;
+}
+
+.merge-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.merge-item:hover {
+    border-color: var(--primary);
+    background: var(--bg-card-hover);
+}
+
+.merge-item-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.merge-item-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.merge-item-details h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.merge-item-details span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.merge-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Remove Pages Grid */
+.pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto 2rem;
+}
+
+.page-thumb-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.page-thumb-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+}
+
+.page-thumb-card.marked-delete {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.15);
+    opacity: 0.7;
+}
+
+.page-thumb-canvas {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+.page-thumb-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.page-delete-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: var(--danger);
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.page-thumb-card.marked-delete .page-delete-badge {
+    display: flex;
+}
+
+/* Compress PDF Options */
+.compress-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto 2rem;
+}
+
+.compress-option-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.compress-option-card:hover, .compress-option-card.selected {
+    border-color: var(--primary);
+    background: var(--bg-card-hover);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.compress-option-card.selected {
+    background: rgba(99, 102, 241, 0.12);
+}
+
+.compress-icon {
+    font-size: 2.2rem;
+    color: var(--primary);
+}
+
+.compress-option-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--text-main);
+}
+
+.compress-option-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .compress-options-grid {
+        grid-template-columns: 1fr;
+    }
+}

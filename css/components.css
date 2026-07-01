@@ -1,0 +1,351 @@
+/* ==========================================================================
+   PDF Editor Pro - UI Components (Buttons, Tool Cards, Tabs, Upload Zone)
+   ========================================================================== */
+
+/* Buttons */
+.btn {
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    outline: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--border-hover);
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.35);
+}
+.btn-accent:hover {
+    opacity: 0.95;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.btn-success:hover {
+    background: var(--success-hover);
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #ffffff;
+}
+.btn-danger:hover {
+    background: var(--danger-hover);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+}
+.btn-icon:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+}
+
+.btn-sm {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+}
+.btn-lg {
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+}
+.btn-full {
+    width: 100%;
+}
+
+/* Dashboard Tool Cards */
+.tool-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.tool-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.tool-card:hover::before {
+    opacity: 1;
+}
+
+.tool-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: var(--radius-md);
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    transition: var(--transition);
+}
+
+.tool-card:hover .tool-icon {
+    background: var(--primary);
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+.tool-info h3 {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--text-main);
+}
+
+.tool-info p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.tool-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: rgba(236, 72, 153, 0.15);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.75rem 1rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.upload-icon-pulse {
+    font-size: 2.2rem;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+    animation: pulseIcon 2s infinite;
+}
+
+@keyframes pulseIcon {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+.upload-main-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.upload-sub-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Document Info Card */
+.doc-info-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.doc-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.doc-details {
+    flex: 1;
+    overflow: hidden;
+}
+
+.doc-details h3 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-details span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.btn-remove-doc {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.25rem;
+    transition: var(--transition);
+}
+.btn-remove-doc:hover {
+    color: var(--danger);
+}
+
+/* Tabs */
+.sig-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    color: #ffffff;
+    background: var(--primary);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Badges */
+.badge {
+    background: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+}

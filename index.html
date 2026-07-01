@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignaDoc Pro - Aplikasi Tanda Tangan Dokumen Digital</title>
-    <meta name="description" content="Aplikasi Windows berbasis HTML sederhana dan modern untuk menambahkan tanda tangan digital pada dokumen PDF dan Gambar dengan mudah dan aman.">
+    <title>PDF Editor Pro - All-in-One Windows PDF Suite</title>
+    <meta name="description" content="Aplikasi Windows offline lengkap untuk mengedit PDF, menambahkan tanda tangan, menggabungkan, memampatkan, menghapus halaman, dan mengonversi file dengan aman.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,318 +14,484 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/tools.css">
+    <link rel="stylesheet" href="css/modals.css">
 
-    <!-- PDF.js & PDF-Lib Libraries -->
+    <!-- External Libraries (PDF.js, PDF-Lib, JSZip) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body class="theme-dark">
     <div class="app-container">
-        <!-- Top Navigation / Header -->
+        <!-- Header -->
         <header class="app-header">
-            <div class="logo-section">
+            <div class="logo-section" title="Kembali ke Menu Utama">
                 <div class="logo-icon">
-                    <i class="fa-solid fa-signature"></i>
+                    <i class="fa-solid fa-file-shield"></i>
                 </div>
                 <div class="logo-text">
-                    <h1>SignaDoc <span>Pro</span></h1>
-                    <p class="tagline">Windows Document Signer</p>
+                    <h1>PDF <span>Editor</span></h1>
+                    <p class="tagline">Windows Offline Studio</p>
                 </div>
             </div>
-
             <div class="header-actions">
-                <button id="themeToggleBtn" class="btn btn-icon" title="Ubah Tema (Gelap/Terang)">
-                    <i class="fa-solid fa-sun"></i>
+                <button id="themeToggleBtn" class="btn btn-icon" title="Ganti Tema (Gelap/Terang)">
+                    <i class="fa-solid fa-moon"></i>
                 </button>
-                <button id="helpBtn" class="btn btn-secondary btn-sm" title="Panduan Penggunaan">
-                    <i class="fa-solid fa-circle-question"></i><span>Panduan</span>
+                <button id="helpBtn" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-circle-question"></i> <span>Panduan</span>
                 </button>
             </div>
         </header>
 
-        <!-- Main Workspace -->
-        <main class="workspace">
-            <!-- Sidebar / Control Panel -->
-            <aside class="sidebar">
-                <div class="panel-section">
-                    <h2 class="panel-title"><i class="fa-solid fa-folder-open"></i> 1. Pilih Dokumen</h2>
-                    <div class="upload-zone" id="dropZone">
-                        <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden>
-                        <div class="upload-content">
-                            <div class="upload-icon-pulse">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                            </div>
-                            <p class="upload-main-text">Klik atau Tarik File ke Sini</p>
-                            <p class="upload-sub-text">Mendukung PDF, PNG, JPG (Maks. 20MB)</p>
-                            <button class="btn btn-primary btn-sm mt-2" onclick="document.getElementById('fileInput').click()">
-                                <i class="fa-solid fa-plus"></i> Pilih File
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Document Info Card (Hidden by default) -->
-                    <div id="docInfoCard" class="doc-info-card hidden">
-                        <div class="doc-icon"><i class="fa-solid fa-file-pdf" id="docTypeIcon"></i></div>
-                        <div class="doc-details">
-                            <h3 id="docName">Nama Dokumen.pdf</h3>
-                            <span id="docMeta">PDF • 5 Halaman</span>
-                        </div>
-                        <button class="btn-remove-doc" id="closeDocBtn" title="Tutup Dokumen">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
+        <!-- Main Content Section -->
+        <div class="view-section">
+            <!-- 1. DASHBOARD VIEW (Menu 7 Alat PDF) -->
+            <div id="dashboardView" class="dashboard-view">
+                <div class="dashboard-hero">
+                    <h2>All-in-One PDF Editor & Tools</h2>
+                    <p>Kelola, sunting, gabungkan, kompres, dan konversi dokumen Anda secara 100% lokal & offline langsung dari Windows Anda dengan keamanan dan privasi penuh.</p>
                 </div>
 
-                <div class="panel-section">
-                    <h2 class="panel-title"><i class="fa-solid fa-pen-nib"></i> 2. Tanda Tangan</h2>
-                    <p class="section-desc">Buat dan tambahkan tanda tangan ke atas dokumen.</p>
-                    
-                    <button id="openSigModalBtn" class="btn btn-accent btn-full">
-                        <i class="fa-solid fa-signature"></i> Buat Tanda Tangan Baru
-                    </button>
-
-                    <!-- Saved Signatures List -->
-                    <div class="saved-signatures-header mt-4">
-                        <span>Tanda Tangan Aktif</span>
-                        <span class="badge" id="sigCountBadge">0</span>
-                    </div>
-                    <div class="signatures-list" id="signaturesList">
-                        <div class="empty-state">
-                            <i class="fa-regular fa-folder-open"></i>
-                            <p>Belum ada tanda tangan dibuat</p>
+                <div class="tools-grid">
+                    <div class="tool-card" data-tool="editor">
+                        <div class="tool-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+                        <div class="tool-info">
+                            <h3>Edit PDF & Tanda Tangan</h3>
+                            <p>Bubuhkan tanda tangan digital, tambahkan catatan teks bebas, dan cap stempel resmi ke atas halaman PDF.</p>
                         </div>
+                        <span class="tool-badge">Popular</span>
                     </div>
-                </div>
 
-                <div class="panel-section mt-auto">
-                    <h2 class="panel-title"><i class="fa-solid fa-file-export"></i> 3. Simpan & Ekspor</h2>
-                    <p class="section-desc">Pilih folder penyimpanan dan simpan dokumen hasil akhir.</p>
-                    <button id="exportBtn" class="btn btn-success btn-full btn-lg" disabled>
-                        <i class="fa-solid fa-folder-arrow-down"></i> Simpan Dokumen Ke...
-                    </button>
-                </div>
-            </aside>
-
-            <!-- Main Document Viewer -->
-            <section class="viewer-container">
-                <!-- Viewer Toolbar -->
-                <div class="viewer-toolbar" id="viewerToolbar">
-                    <div class="toolbar-left">
-                        <div class="page-controls hidden" id="pageControls">
-                            <button id="prevPageBtn" class="btn btn-icon btn-sm" title="Halaman Sebelumnya" disabled>
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
-                            <div class="page-indicator">
-                                <span>Halaman</span>
-                                <input type="number" id="pageNumberInput" value="1" min="1" max="1" class="page-input">
-                                <span>dari <strong id="totalPagesCount">1</strong></span>
-                            </div>
-                            <button id="nextPageBtn" class="btn btn-icon btn-sm" title="Halaman Berikutnya" disabled>
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
+                    <div class="tool-card" data-tool="merge">
+                        <div class="tool-icon" style="color:#10b981; background:rgba(16,185,129,0.15);"><i class="fa-solid fa-object-group"></i></div>
+                        <div class="tool-info">
+                            <h3>Gabungkan PDF</h3>
+                            <p>Satukan beberapa file PDF menjadi 1 dokumen utuh dengan mudah dan cepat sesuai urutan keinginan Anda.</p>
                         </div>
                     </div>
 
-                    <div class="toolbar-center">
-                        <span class="viewer-status" id="viewerStatusText">Silakan unggah dokumen untuk mulai menandatangani</span>
-                    </div>
-
-                    <div class="toolbar-right">
-                        <div class="zoom-controls hidden" id="zoomControls">
-                            <button id="zoomOutBtn" class="btn btn-icon btn-sm" title="Perkecil">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
-                            <span id="zoomLevelText" class="zoom-text">100%</span>
-                            <button id="zoomInBtn" class="btn btn-icon btn-sm" title="Perbesar">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-                            <button id="zoomResetBtn" class="btn btn-icon btn-sm" title="Reset Zoom">
-                                <i class="fa-solid fa-arrows-to-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Viewer Canvas / Area -->
-                <div class="viewer-viewport" id="viewerViewport">
-                    <!-- Empty state placeholder -->
-                    <div class="viewer-empty-state" id="viewerEmptyState">
-                        <div class="empty-illustration">
-                            <div class="circle-bg"></div>
-                            <i class="fa-solid fa-file-signature"></i>
-                        </div>
-                        <h3>Belum Ada Dokumen Terbuka</h3>
-                        <p>Pilih file PDF atau Gambar dari panel sebelah kiri atau tarik file langsung ke jendela ini.</p>
-                        <div class="quick-features">
-                            <div class="q-feat"><i class="fa-solid fa-check"></i> <span>Privasi 100% Aman (Offline / Lokal)</span></div>
-                            <div class="q-feat"><i class="fa-solid fa-check"></i> <span>Kualitas Ekspor Tinggi (Tanpa Kompresi)</span></div>
-                            <div class="q-feat"><i class="fa-solid fa-check"></i> <span>Mudah Digeser & Diatur Ukurannya</span></div>
+                    <div class="tool-card" data-tool="pages">
+                        <div class="tool-icon" style="color:#f59e0b; background:rgba(245,158,11,0.15);"><i class="fa-solid fa-scissors"></i></div>
+                        <div class="tool-info">
+                            <h3>Hapus Halaman PDF</h3>
+                            <p>Lihat thumbnail seluruh halaman dan hapus halaman yang tidak diinginkan (halaman kosong / cover) dalam sekejap.</p>
                         </div>
                     </div>
 
-                    <!-- Document Rendering Wrapper -->
-                    <div class="canvas-wrapper hidden" id="canvasWrapper">
-                        <!-- PDF.js or Image rendered here -->
-                        <canvas id="docCanvas"></canvas>
-                        <!-- Signature Overlays container (relative to canvas dimensions) -->
-                        <div class="overlays-layer" id="overlaysLayer"></div>
+                    <div class="tool-card" data-tool="compress">
+                        <div class="tool-icon" style="color:#ec4899; background:rgba(236,72,153,0.15);"><i class="fa-solid fa-compress"></i></div>
+                        <div class="tool-info">
+                            <h3>Kompres PDF</h3>
+                            <p>Mampatkan ukuran file PDF yang terlalu besar agar mudah dikirim melalui email atau WhatsApp tanpa merusak teks.</p>
+                        </div>
                     </div>
-                </div>
-            </section>
-        </main>
-    </div>
 
-    <!-- Modal: Create Signature -->
-    <div class="modal-backdrop hidden" id="sigModalBackdrop">
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Buat Tanda Tangan</h3>
-                <button class="btn-close-modal" id="closeSigModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <!-- Signature Type Tabs -->
-                <div class="sig-tabs">
-                    <button class="tab-btn active" data-tab="draw"><i class="fa-solid fa-signature"></i> Gambar Langsung</button>
-                    <button class="tab-btn" data-tab="type"><i class="fa-solid fa-keyboard"></i> Ketik Nama</button>
-                    <button class="tab-btn" data-tab="upload"><i class="fa-solid fa-file-import"></i> Unggah Gambar</button>
-                </div>
+                    <div class="tool-card" data-tool="converter" onclick="setTimeout(()=>setConverterMode('pdf-to-img'),50);">
+                        <div class="tool-icon" style="color:#8b5cf6; background:rgba(139,92,246,0.15);"><i class="fa-solid fa-file-image"></i></div>
+                        <div class="tool-info">
+                            <h3>PDF ke Gambar</h3>
+                            <p>Ekstrak halaman dokumen PDF menjadi file gambar PNG / JPG berkualitas tinggi. Otomatis dikemas dalam ZIP.</p>
+                        </div>
+                    </div>
 
-                <!-- Tab 1: Draw Signature -->
-                <div class="tab-content active" id="tab-draw">
-                    <div class="draw-tools">
-                        <div class="tool-group">
-                            <label>Warna Tinta:</label>
-                            <div class="color-picker-group">
-                                <button class="color-dot active" style="background: #000000;" data-color="#000000" title="Hitam"></button>
-                                <button class="color-dot" style="background: #1a56db;" data-color="#1a56db" title="Biru"></button>
-                                <button class="color-dot" style="background: #dc2626;" data-color="#dc2626" title="Merah"></button>
-                                <button class="color-dot" style="background: #047857;" data-color="#047857" title="Hijau"></button>
-                            </div>
-                        </div>
-                        <div class="tool-group">
-                            <label>Ketebalan:</label>
-                            <input type="range" id="penWidthSlider" min="1" max="8" value="3" class="slider">
-                            <span id="penWidthVal">3px</span>
-                        </div>
-                        <button class="btn btn-secondary btn-sm ml-auto" id="clearDrawBtn">
-                            <i class="fa-solid fa-eraser"></i> Bersihkan
-                        </button>
-                    </div>
-                    <div class="canvas-draw-container">
-                        <canvas id="sigDrawCanvas" width="500" height="220"></canvas>
-                        <div class="canvas-placeholder" id="drawPlaceholder">
-                            <i class="fa-solid fa-arrow-pointer"></i>
-                            <span>Gunakan mouse atau layar sentuh untuk menggambar tanda tangan</span>
+                    <div class="tool-card" data-tool="converter" onclick="setTimeout(()=>setConverterMode('img-to-pdf'),50);">
+                        <div class="tool-icon" style="color:#06b6d4; background:rgba(6,182,212,0.15);"><i class="fa-solid fa-images"></i></div>
+                        <div class="tool-info">
+                            <h3>Gambar ke PDF</h3>
+                            <p>Ubah foto dokumen, KTP, atau gambar apapun (JPG, PNG, WebP) menjadi dokumen PDF standar profesional.</p>
                         </div>
                     </div>
-                </div>
 
-                <!-- Tab 2: Type Signature -->
-                <div class="tab-content" id="tab-type">
-                    <div class="type-input-group">
-                        <input type="text" id="typedNameInput" placeholder="Ketik nama Anda di sini..." autocomplete="off">
-                        <div class="color-picker-group">
-                            <button class="color-dot active" style="background: #000000;" data-color="#000000" title="Hitam"></button>
-                            <button class="color-dot" style="background: #1a56db;" data-color="#1a56db" title="Biru"></button>
-                            <button class="color-dot" style="background: #dc2626;" data-color="#dc2626" title="Merah"></button>
+                    <div class="tool-card" data-tool="converter" onclick="setTimeout(()=>setConverterMode('pdf-to-word'),50);">
+                        <div class="tool-icon" style="color:#3b82f6; background:rgba(59,130,246,0.15);"><i class="fa-solid fa-file-word"></i></div>
+                        <div class="tool-info">
+                            <h3>PDF ke Word (.doc)</h3>
+                            <p>Ekstrak teks dan struktur kalimat dari dalam PDF menjadi dokumen Word yang bisa diedit di Microsoft Office.</p>
                         </div>
-                    </div>
-                    <div class="font-preview-grid" id="fontPreviewGrid">
-                        <div class="font-card active" data-font="Great Vibes">
-                            <span class="font-sample style-great-vibes">Tanda Tangan</span>
-                            <span class="font-name">Great Vibes (Elegan)</span>
-                        </div>
-                        <div class="font-card" data-font="Pacifico">
-                            <span class="font-sample style-pacifico">Tanda Tangan</span>
-                            <span class="font-name">Pacifico (Klasik)</span>
-                        </div>
-                        <div class="font-card" data-font="Caveat">
-                            <span class="font-sample style-caveat">Tanda Tangan</span>
-                            <span class="font-name">Caveat (Alami)</span>
-                        </div>
-                        <div class="font-card" data-font="Dancing Script">
-                            <span class="font-sample style-dancing">Tanda Tangan</span>
-                            <span class="font-name">Dancing Script (Dinamis)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab 3: Upload Image -->
-                <div class="tab-content" id="tab-upload">
-                    <div class="upload-sig-zone" id="uploadSigDrop">
-                        <input type="file" id="sigFileInput" accept=".png,.jpg,.jpeg,.webp" hidden>
-                        <i class="fa-solid fa-image"></i>
-                        <h4>Pilih Gambar Tanda Tangan</h4>
-                        <p>Disarankan menggunakan gambar format <strong>PNG transparan</strong></p>
-                        <button class="btn btn-secondary mt-3" onclick="document.getElementById('sigFileInput').click()">
-                            Cari File Gambar
-                        </button>
-                    </div>
-                    <div class="sig-preview-box hidden" id="sigImagePreviewBox">
-                        <img id="sigImagePreview" src="" alt="Preview Tanda Tangan">
-                        <button class="btn btn-danger btn-sm mt-2" id="removeUploadedSigBtn">
-                            <i class="fa-solid fa-trash"></i> Ganti Gambar
-                        </button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelSigBtn">Batal</button>
-                <button class="btn btn-primary" id="saveSigBtn">
-                    <i class="fa-solid fa-check"></i> Gunakan Tanda Tangan
-                </button>
+
+            <!-- 2. WORKSPACE VIEW (Area Kerja Alat) -->
+            <div id="workspaceView" class="workspace hidden" style="flex-direction: column;">
+                <div style="background: var(--bg-glass); padding: 0.85rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <button id="backToDashboardBtn" class="btn btn-secondary btn-sm">
+                            <i class="fa-solid fa-arrow-left"></i> <span>Kembali ke Menu Utama</span>
+                        </button>
+                        <h3 id="workspaceTitle" style="font-family: var(--font-heading); font-size: 1.2rem; color: var(--text-main);"></h3>
+                    </div>
+                </div>
+
+                <div style="flex: 1; display: flex; overflow: hidden; position: relative;">
+                    <!-- A. EDITOR WORKSPACE (Interactive Editor Tool) -->
+                    <div id="editorWorkspace" class="tool-workspace hidden" style="padding: 0; flex-direction: row; width: 100%;">
+                        <aside class="sidebar">
+                            <div class="panel-section">
+                                <div class="panel-title"><i class="fa-solid fa-folder-open"></i> Dokumen Aktif</div>
+                                <div id="dropZone" class="upload-zone">
+                                    <i class="fa-solid fa-file-import upload-icon-pulse"></i>
+                                    <p class="upload-main-text">Tarik & Lepas Dokumen di Sini</p>
+                                    <p class="upload-sub-text">atau klik untuk menelusuri (PDF / PNG / JPG)</p>
+                                    <input type="file" id="fileInput" accept=".pdf,image/*" style="display: none;">
+                                </div>
+                                <div id="docInfoCard" class="doc-info-card hidden mt-2">
+                                    <div class="doc-icon"><i id="docTypeIcon" class="fa-solid fa-file-pdf"></i></div>
+                                    <div class="doc-details">
+                                        <h3 id="docName">dokumen.pdf</h3>
+                                        <span id="docMeta">PDF • 1 Halaman</span>
+                                    </div>
+                                    <button id="closeDocBtn" class="btn-remove-doc" title="Tutup Dokumen"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="panel-section">
+                                <div class="panel-title"><i class="fa-solid fa-signature"></i> Tanda Tangan</div>
+                                <p class="section-desc">Klik tombol di bawah untuk membuat atau memilih dari daftar.</p>
+                                <button id="openSigModalBtn" class="btn btn-primary btn-full mb-3"><i class="fa-solid fa-plus"></i> Buat Tanda Tangan Baru</button>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin: 0.8rem 0 0.4rem;">
+                                    <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">Tanda Tangan Tersimpan</span>
+                                    <span id="sigCountBadge" class="badge">0</span>
+                                </div>
+                                <div id="signaturesList" class="signatures-list">
+                                    <div style="text-align:center; padding:1rem; color:var(--text-muted); font-size:0.82rem;"><i class="fa-regular fa-folder-open"></i> Belum ada tanda tangan</div>
+                                </div>
+                            </div>
+
+                            <div class="panel-section">
+                                <div class="panel-title"><i class="fa-solid fa-font"></i> Anotasi Teks</div>
+                                <p class="section-desc">Tambahkan catatan teks atau nama di mana saja pada halaman.</p>
+                                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+                                    <input type="text" id="freeTextInput" placeholder="Ketik teks catatan..." style="flex:1; padding:0.5rem; border-radius:6px; border:1px solid var(--border-color); background:rgba(0,0,0,0.2); color:var(--text-main); font-size:0.85rem;">
+                                    <input type="color" id="freeTextColorInput" value="#000000" style="width:38px; height:36px; border:none; border-radius:6px; cursor:pointer; background:transparent;">
+                                </div>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <select id="freeTextSizeInput" style="padding:0.5rem; border-radius:6px; border:1px solid var(--border-color); background:rgba(255,255,255,0.05); color:var(--text-main); font-size:0.85rem;">
+                                        <option value="16">Kecil (16px)</option>
+                                        <option value="24" selected>Sedang (24px)</option>
+                                        <option value="32">Besar (32px)</option>
+                                        <option value="48">Judul (48px)</option>
+                                    </select>
+                                    <button id="addFreeTextBtn" class="btn btn-secondary btn-sm" style="flex:1;"><i class="fa-solid fa-plus"></i> Sisipkan Teks</button>
+                                </div>
+                            </div>
+
+                            <div class="panel-section">
+                                <div class="panel-title"><i class="fa-solid fa-stamp"></i> Stempel & Tanggal</div>
+                                <p class="section-desc">Sisipkan cap resmi atau tanggal hari ini dengan cepat.</p>
+                                <button id="addTodayDateBtn" class="btn btn-secondary btn-sm mb-2" style="width:100%; justify-content:center;"><i class="fa-regular fa-calendar-days"></i> Sisipkan Tanggal Hari Ini</button>
+                                <div class="stamps-grid mt-2">
+                                    <button class="stamp-btn" data-stamp="DISETUJUI" data-color="#10b981" style="color:#10b981;">DISETUJUI</button>
+                                    <button class="stamp-btn" data-stamp="LUNAS" data-color="#3b82f6" style="color:#3b82f6;">LUNAS</button>
+                                    <button class="stamp-btn" data-stamp="RAHASIA" data-color="#ef4444" style="color:#ef4444;">RAHASIA</button>
+                                    <button class="stamp-btn" data-stamp="SEMENTARA" data-color="#f59e0b" style="color:#f59e0b;">SEMENTARA</button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                                <button id="exportBtn" class="btn btn-success btn-lg btn-full" disabled>
+                                    <i class="fa-solid fa-folder-arrow-down"></i> Simpan Dokumen Ke...
+                                </button>
+                            </div>
+                        </aside>
+
+                        <main class="viewer-container">
+                            <div class="viewer-toolbar">
+                                <div class="toolbar-left">
+                                    <div id="pageControls" class="page-controls hidden">
+                                        <button id="prevPageBtn" class="btn btn-icon btn-sm" title="Halaman Sebelumnya"><i class="fa-solid fa-chevron-left"></i></button>
+                                        <span class="page-indicator">Hal <input type="number" id="pageNumberInput" class="page-input" value="1" min="1"> / <span id="totalPagesCount">1</span></span>
+                                        <button id="nextPageBtn" class="btn btn-icon btn-sm" title="Halaman Berikutnya"><i class="fa-solid fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                <div class="toolbar-center">
+                                    <span id="viewerStatusText" class="viewer-status">Buka dokumen untuk mulai menyunting</span>
+                                </div>
+                                <div class="toolbar-right">
+                                    <div id="zoomControls" class="zoom-controls hidden">
+                                        <button id="zoomOutBtn" class="btn btn-icon btn-sm" title="Perkecil"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                                        <span id="zoomLevelText" style="font-size: 0.8rem; min-width: 45px; text-align: center; font-weight:600;">120%</span>
+                                        <button id="zoomInBtn" class="btn btn-icon btn-sm" title="Perbesar"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                                        <button id="zoomResetBtn" class="btn btn-icon btn-sm" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
+                                    </div>
+                                    <button id="rotatePageBtn" class="btn btn-secondary btn-sm hidden" title="Putar Halaman 90°"><i class="fa-solid fa-rotate-right"></i> Putar</button>
+                                    <button id="deletePageBtn" class="btn btn-danger btn-sm hidden" title="Hapus Halaman Ini"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="viewer-viewport" id="viewerViewport">
+                                <div id="viewerEmptyState" class="viewer-empty-state">
+                                    <div class="empty-illustration"><div class="circle-bg"></div><i class="fa-regular fa-file-pdf"></i></div>
+                                    <h3>Area Kerja PDF Editor Pro</h3>
+                                    <p>Pilih file dari panel sebelah kiri atau langsung tarik dokumen Anda ke area ini.</p>
+                                    <div class="quick-features">
+                                        <div class="q-feat"><i class="fa-solid fa-check"></i> Tanda tangan digital lukis & teks</div>
+                                        <div class="q-feat"><i class="fa-solid fa-check"></i> Anotasi teks, stempel, & putar halaman</div>
+                                        <div class="q-feat"><i class="fa-solid fa-check"></i> Privasi 100% lokal & offline di Windows</div>
+                                    </div>
+                                </div>
+                                <div id="canvasWrapper" class="canvas-wrapper hidden">
+                                    <canvas id="docCanvas"></canvas>
+                                    <div id="overlaysLayer" class="overlays-layer"></div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+
+                    <!-- B. MERGE WORKSPACE (Gabung PDF Tool) -->
+                    <div id="mergeWorkspace" class="tool-workspace hidden">
+                        <div class="tool-header">
+                            <div class="tool-header-left">
+                                <h2><i class="fa-solid fa-object-group" style="color:#10b981;"></i> Gabungkan File PDF</h2>
+                                <p>Satukan beberapa dokumen PDF menjadi 1 file utuh. Atur urutan file dengan tombol panah di samping.</p>
+                            </div>
+                            <div>
+                                <button id="executeMergeBtn" class="btn btn-success btn-lg" disabled><i class="fa-solid fa-object-group"></i> Gabungkan & Simpan PDF</button>
+                            </div>
+                        </div>
+                        <div id="mergeDropZone" class="upload-zone" style="max-width:800px; width:100%; margin: 0 auto 2rem;" onclick="document.getElementById('mergeFileInput').click();">
+                            <i class="fa-solid fa-file-circle-plus upload-icon-pulse" style="color:#10b981;"></i>
+                            <p class="upload-main-text">Klik atau Tarik Beberapa File PDF ke Sini</p>
+                            <p class="upload-sub-text">Mendukung banyak file sekaligus</p>
+                            <input type="file" id="mergeFileInput" accept=".pdf,application/pdf" multiple style="display: none;">
+                        </div>
+                        <div id="mergeEmptyState" class="text-center" style="padding: 3rem; color: var(--text-muted);">
+                            <i class="fa-regular fa-folder-open fa-3x mb-3" style="opacity:0.3;"></i>
+                            <p>Belum ada file PDF yang ditambahkan untuk digabungkan.</p>
+                        </div>
+                        <div id="mergeList" class="merge-list"></div>
+                    </div>
+
+                    <!-- C. REMOVE PAGES WORKSPACE (Hapus Halaman Tool) -->
+                    <div id="pagesWorkspace" class="tool-workspace hidden">
+                        <div class="tool-header">
+                            <div class="tool-header-left">
+                                <h2><i class="fa-solid fa-scissors" style="color:#f59e0b;"></i> Hapus Halaman PDF</h2>
+                                <p id="pagesDocInfo">Pilih atau tarik file PDF untuk menampilkan thumbnail seluruh halamannya.</p>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:1rem;">
+                                <span id="pagesDeleteStatusText" style="font-size:0.9rem; color:var(--text-muted);">Belum ada halaman dipilih.</span>
+                                <button id="executeRemovePagesBtn" class="btn btn-danger btn-lg" disabled><i class="fa-solid fa-file-export"></i> Simpan PDF Bersih</button>
+                            </div>
+                        </div>
+                        <div id="pagesDropZone" class="upload-zone" style="max-width:800px; width:100%; margin: 0 auto 2rem;" onclick="document.getElementById('pagesFileInput').click();">
+                            <i class="fa-solid fa-file-circle-minus upload-icon-pulse" style="color:#f59e0b;"></i>
+                            <p class="upload-main-text">Klik atau Tarik Dokumen PDF ke Sini</p>
+                            <p class="upload-sub-text">Thumbnail halaman akan otomatis ditampilkan</p>
+                            <input type="file" id="pagesFileInput" accept=".pdf,application/pdf" style="display: none;">
+                        </div>
+                        <div id="pagesEmptyState" class="text-center" style="padding: 3rem; color: var(--text-muted);">
+                            <i class="fa-regular fa-file-lines fa-3x mb-3" style="opacity:0.3;"></i>
+                            <p>Buka file PDF untuk melihat seluruh halaman dokumen.</p>
+                        </div>
+                        <div id="pagesThumbGrid" class="pages-grid"></div>
+                    </div>
+
+                    <!-- D. COMPRESS WORKSPACE (Kompres PDF Tool) -->
+                    <div id="compressWorkspace" class="tool-workspace hidden">
+                        <div class="tool-header">
+                            <div class="tool-header-left">
+                                <h2><i class="fa-solid fa-compress" style="color:#ec4899;"></i> Kompres & Mampatkan PDF</h2>
+                                <p id="compressDocInfo">Kurangi ukuran file dokumen PDF Anda tanpa mengorbankan keterbacaan teks.</p>
+                            </div>
+                            <div>
+                                <button id="executeCompressBtn" class="btn btn-accent btn-lg" disabled><i class="fa-solid fa-compress"></i> Kompres & Simpan PDF Sekarang</button>
+                            </div>
+                        </div>
+                        <div id="compressDropZone" class="upload-zone" style="max-width:800px; width:100%; margin: 0 auto 2rem;" onclick="document.getElementById('compressFileInput').click();">
+                            <i class="fa-solid fa-file-zipper upload-icon-pulse" style="color:#ec4899;"></i>
+                            <p class="upload-main-text">Klik atau Tarik Dokumen PDF yang Ingin Dikompres</p>
+                            <p class="upload-sub-text">Maksimal ukuran file hingga puluhan MB</p>
+                            <input type="file" id="compressFileInput" accept=".pdf,application/pdf" style="display: none;">
+                        </div>
+                        <div id="compressEmptyState" class="text-center" style="padding: 3rem; color: var(--text-muted);">
+                            <i class="fa-solid fa-compress fa-3x mb-3" style="opacity:0.3;"></i>
+                            <p>Unggah dokumen PDF untuk memilih tingkat kompresi.</p>
+                        </div>
+                        <div id="compressOptionsArea" class="hidden" style="max-width:900px; width:100%; margin: 0 auto;">
+                            <h3 style="font-family:var(--font-heading); font-size:1.1rem; margin-bottom:1rem; text-align:center;">Pilih Tingkat Kompresi:</h3>
+                            <div class="compress-options-grid">
+                                <div class="compress-option-card" data-level="light">
+                                    <div class="compress-icon"><i class="fa-solid fa-feather"></i></div>
+                                    <h3>Kompresi Ringan</h3>
+                                    <p>Kualitas gambar tetap sangat tajam dan jernih. Ukuran file berkurang sedikit.</p>
+                                </div>
+                                <div class="compress-option-card selected" data-level="medium">
+                                    <div class="compress-icon" style="color:#10b981;"><i class="fa-solid fa-thumbs-up"></i></div>
+                                    <h3>Optimal (Disarankan)</h3>
+                                    <p>Keseimbangan terbaik antara kualitas teks yang jelas dan ukuran file kecil.</p>
+                                </div>
+                                <div class="compress-option-card" data-level="extreme">
+                                    <div class="compress-icon" style="color:#ef4444;"><i class="fa-solid fa-down-left-and-up-right-to-center"></i></div>
+                                    <h3>Kompresi Ekstra</h3>
+                                    <p>Ukuran file menjadi sangat kecil. Sangat cocok untuk dokumen hasil scan.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E. CONVERTER WORKSPACE (Konversi PDF Tool) -->
+                    <div id="converterWorkspace" class="tool-workspace hidden">
+                        <div class="tool-header">
+                            <div class="tool-header-left">
+                                <h2><i class="fa-solid fa-wand-magic-sparkles" style="color:#8b5cf6;"></i> Pusat Konversi Dokumen</h2>
+                                <p id="converterModeDesc">Ekstrak seluruh halaman dokumen PDF menjadi file gambar berkualitas tinggi.</p>
+                            </div>
+                            <div>
+                                <button id="executeConvertBtn" class="btn btn-primary btn-lg" disabled><i class="fa-solid fa-wand-magic-sparkles"></i> Mulai Konversi & Simpan</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;">
+                            <button class="btn btn-secondary converter-tab-btn active" data-mode="pdf-to-img"><i class="fa-solid fa-file-image"></i> PDF ke Gambar</button>
+                            <button class="btn btn-secondary converter-tab-btn" data-mode="img-to-pdf"><i class="fa-solid fa-images"></i> Gambar ke PDF</button>
+                            <button class="btn btn-secondary converter-tab-btn" data-mode="pdf-to-word"><i class="fa-solid fa-file-word"></i> PDF ke Word (.doc)</button>
+                        </div>
+                        <div id="converterDropZone" class="upload-zone" style="max-width:800px; width:100%; margin: 0 auto 1.5rem;" onclick="document.getElementById('converterFileInput').click();">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon-pulse" style="color:#8b5cf6;"></i>
+                            <p class="upload-main-text">Klik atau Tarik File Dokumen ke Sini</p>
+                            <p class="upload-sub-text">Pilih file sesuai mode konversi yang sedang aktif</p>
+                            <input type="file" id="converterFileInput" accept=".pdf,application/pdf" style="display: none;">
+                        </div>
+                        <div id="converterEmptyState" class="text-center" style="padding: 2rem; color: var(--text-muted);">
+                            <i class="fa-regular fa-folder-open fa-3x mb-2" style="opacity:0.3;"></i>
+                            <p>Unggah file dokumen untuk memulai proses konversi.</p>
+                        </div>
+                        <div id="converterFilesList" style="max-width:800px; width:100%; margin: 0 auto;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Help / Guide -->
-    <div class="modal-backdrop hidden" id="helpModalBackdrop">
+    <!-- MODAL BUAT TANDA TANGAN -->
+    <div id="sigModalBackdrop" class="modal-backdrop hidden">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-signature"></i> Buat Tanda Tangan Digital</h3>
+                <button id="closeSigModalBtn" class="btn-close-modal" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="sig-tabs">
+                    <button class="tab-btn active" data-tab="draw"><i class="fa-solid fa-pen"></i> Gambar (Draw)</button>
+                    <button class="tab-btn" data-tab="type"><i class="fa-solid fa-keyboard"></i> Ketik Nama (Type)</button>
+                    <button class="tab-btn" data-tab="upload"><i class="fa-solid fa-upload"></i> Unggah Stempel</button>
+                </div>
+                <div id="tab-draw" class="tab-content active">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Warna Tinta:</span>
+                            <div class="color-dot active" data-color="#000000" style="background:#000000;"></div>
+                            <div class="color-dot" data-color="#1e3a8a" style="background:#1e3a8a;"></div>
+                            <div class="color-dot" data-color="#2563eb" style="background:#2563eb;"></div>
+                            <div class="color-dot" data-color="#dc2626" style="background:#dc2626;"></div>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Pena:</span>
+                            <input type="range" id="penWidthSlider" min="2" max="6" value="3" style="width:70px;">
+                            <span id="penWidthVal" style="font-size:0.8rem; font-weight:600;">3px</span>
+                        </div>
+                    </div>
+                    <div style="position:relative; border:2px dashed var(--border-color); border-radius:8px; background:#ffffff;">
+                        <canvas id="sigDrawCanvas" width="500" height="200" style="display:block; width:100%; cursor:crosshair; border-radius:6px;"></canvas>
+                        <div id="drawPlaceholder" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; pointer-events:none; color:#94a3b8; font-size:0.9rem;">
+                            <i class="fa-solid fa-pen-nib mr-2"></i> Goreskan tanda tangan Anda di area putih ini
+                        </div>
+                    </div>
+                    <div style="text-align:right; margin-top:0.75rem;">
+                        <button id="clearDrawBtn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eraser"></i> Bersihkan Kanvas</button>
+                    </div>
+                </div>
+                <div id="tab-type" class="tab-content">
+                    <input type="text" id="typedNameInput" placeholder="Ketik nama lengkap Anda di sini..." style="width:100%; padding:0.85rem; border-radius:8px; border:1px solid var(--border-color); background:rgba(0,0,0,0.2); color:var(--text-main); font-size:1.1rem; margin-bottom:1rem;">
+                    <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:1rem;">
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Warna Teks:</span>
+                        <div class="color-dot active" data-color="#000000" style="background:#000000;"></div>
+                        <div class="color-dot" data-color="#1e3a8a" style="background:#1e3a8a;"></div>
+                        <div class="color-dot" data-color="#2563eb" style="background:#2563eb;"></div>
+                        <div class="color-dot" data-color="#dc2626" style="background:#dc2626;"></div>
+                    </div>
+                    <div class="font-preview-grid">
+                        <div class="font-card active" data-font="Great Vibes"><div class="font-sample style-great-vibes">Tanda Tangan</div><div class="font-name">Great Vibes</div></div>
+                        <div class="font-card" data-font="Pacifico"><div class="font-sample style-pacifico">Tanda Tangan</div><div class="font-name">Pacifico</div></div>
+                        <div class="font-card" data-font="Caveat"><div class="font-sample style-caveat">Tanda Tangan</div><div class="font-name">Caveat</div></div>
+                        <div class="font-card" data-font="Dancing Script"><div class="font-sample style-dancing">Tanda Tangan</div><div class="font-name">Dancing Script</div></div>
+                    </div>
+                </div>
+                <div id="tab-upload" class="tab-content">
+                    <div id="uploadSigDrop" class="upload-zone" onclick="document.getElementById('sigFileInput').click();">
+                        <i class="fa-solid fa-cloud-arrow-up upload-icon-pulse"></i>
+                        <p class="upload-main-text">Klik atau Tarik Gambar Stempel/TTD ke Sini</p>
+                        <p class="upload-sub-text">Format PNG dengan latar belakang transparan disarankan</p>
+                        <input type="file" id="sigFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
+                    </div>
+                    <div id="sigImagePreviewBox" class="hidden text-center mt-3">
+                        <img id="sigImagePreview" src="" alt="Preview" style="max-height:140px; background:#ffffff; padding:0.5rem; border-radius:8px; border:1px solid var(--border-color);">
+                        <div style="margin-top:0.75rem;">
+                            <button id="removeUploadedSigBtn" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Ganti Gambar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelSigBtn" class="btn btn-secondary">Batal</button>
+                <button id="saveSigBtn" class="btn btn-primary"><i class="fa-solid fa-check"></i> Gunakan Tanda Tangan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PANDUAN PENGGUNAAN -->
+    <div id="helpModalBackdrop" class="modal-backdrop hidden">
         <div class="modal-dialog modal-lg">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-circle-info"></i> Panduan Penggunaan SignaDoc Pro</h3>
-                <button class="btn-close-modal" id="closeHelpModalBtn"><i class="fa-solid fa-xmark"></i></button>
+                <h3><i class="fa-solid fa-circle-question"></i> Panduan Penggunaan PDF Editor Pro</h3>
+                <button id="closeHelpModalBtn" class="btn-close-modal" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body guide-body">
                 <div class="guide-step">
                     <div class="step-num">1</div>
                     <div class="step-text">
-                        <h4>Pilih atau Tarik Dokumen</h4>
-                        <p>Anda dapat memasukkan file <strong>PDF</strong> atau foto dokumen <strong>(PNG / JPG)</strong> ke dalam aplikasi ini. Seluruh pemrosesan dilakukan 100% lokal di komputer Windows Anda tanpa koneksi internet.</p>
+                        <h4>Pilih Alat yang Diinginkan di Menu Utama</h4>
+                        <p>PDF Editor Pro menyediakan 7 alat lengkap: Edit PDF & Tanda Tangan, Gabung PDF, Hapus Halaman, Kompres PDF, PDF ke Gambar, Gambar ke PDF, dan PDF ke Word (.doc).</p>
                     </div>
                 </div>
                 <div class="guide-step">
                     <div class="step-num">2</div>
                     <div class="step-text">
-                        <h4>Buat Tanda Tangan</h4>
-                        <p>Klik tombol <strong>"Buat Tanda Tangan Baru"</strong>. Anda bisa menggambar langsung dengan mouse/touchscreen, mengetik nama dengan font sambung estetis, atau mengunggah gambar tanda tangan yang sudah ada.</p>
+                        <h4>Edit & Tanda Tangan Dokumen</h4>
+                        <p>Di menu Edit, Anda bisa melukis tanda tangan, mengetik nama dengan font sambung, atau menambahkan catatan teks dan stempel resmi (seperti DISETUJUI / LUNAS) ke atas halaman.</p>
                     </div>
                 </div>
                 <div class="guide-step">
                     <div class="step-num">3</div>
                     <div class="step-text">
-                        <h4>Tempel & Atur Posisi</h4>
-                        <p>Klik pada tanda tangan yang sudah dibuat untuk menempelkannya ke atas dokumen. Anda bisa <strong>menggeser (drag)</strong> posisinya, serta <strong>memperbesar atau memperkecil</strong> ukurannya menggunakan titik sudut di sekeliling tanda tangan.</p>
-                    </div>
-                </div>
-                <div class="guide-step">
-                    <div class="step-num">4</div>
-                    <div class="step-text">
-                        <h4>Simpan & Pilih Folder</h4>
-                        <p>Klik tombol hijau <strong>"Simpan Dokumen Ke..."</strong>. Anda dapat memilih direktori/folder penyimpanan di komputer Windows Anda serta menentukan nama file hasil akhir.</p>
+                        <h4>Simpan dengan Folder Pilihan (Save As)</h4>
+                        <p>Saat menekan tombol simpan atau ekspor, jendela dialog standar Windows akan Terbuka sehingga Anda bisa memilih direktori penyimpanan dan mengubah nama file sesuka hati!</p>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary ml-auto" id="closeHelpBtn">Mengerti & Mulai</button>
+                <button class="btn btn-primary" onclick="document.getElementById('helpModalBackdrop').classList.add('hidden');">Mengerti</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toastContainer" class="toast-container"></div>
 
-    <!-- Application Script -->
-    <script src="app.js"></script>
+    <!-- Modular JavaScript Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/tool-editor.js"></script>
+    <script src="js/tool-merge.js"></script>
+    <script src="js/tool-pages.js"></script>
+    <script src="js/tool-compress.js"></script>
+    <script src="js/tool-converter.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
