@@ -1028,14 +1028,18 @@ function setupDocumentExport() {
             } else {
                 await exportSignedImage();
             }
-            showToast('Dokumen berhasil diunduh!', 'success');
+            showToast('Dokumen berhasil disimpan di folder pilihan Anda!', 'success');
         } catch (err) {
-            console.error('Export error:', err);
-            const errMsg = err.message || err.toString();
-            showToast(`Gagal mengekspor: ${errMsg}`, 'error');
+            if (err.message === 'Dibatalkan oleh pengguna' || err.name === 'AbortError') {
+                showToast('Proses penyimpanan dibatalkan.', 'info');
+            } else {
+                console.error('Export error:', err);
+                const errMsg = err.message || err.toString();
+                showToast(`Gagal mengekspor: ${errMsg}`, 'error');
+            }
         } finally {
             elements.exportBtn.disabled = false;
-            elements.exportBtn.innerHTML = '<i class="fa-solid fa-download"></i> Unduh Dokumen Resmi';
+            elements.exportBtn.innerHTML = '<i class="fa-solid fa-folder-arrow-down"></i> Simpan Dokumen Ke...';
         }
     });
 }
@@ -1120,7 +1124,7 @@ async function exportSignedPdf() {
     
     // Create download filename
     const baseName = state.docName.replace(/\.[^/.]+$/, "");
-    triggerDownload(blob, `${baseName}_Ditandatangani.pdf`);
+    await saveFileWithPicker(blob, `${baseName}_Ditandatangani.pdf`, 'Dokumen PDF (*.pdf)', { 'application/pdf': ['.pdf'] });
 }
 
 async function exportSignedImage() {
@@ -1148,10 +1152,9 @@ async function exportSignedImage() {
         ctx.drawImage(sigImg, sigX, sigY, sigW, sigH);
     }
     
-    canvas.toBlob((blob) => {
-        const baseName = state.docName.replace(/\.[^/.]+$/, "");
-        triggerDownload(blob, `${baseName}_Ditandatangani.png`);
-    }, 'image/png', 1.0);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+    const baseName = state.docName.replace(/\.[^/.]+$/, "");
+    await saveFileWithPicker(blob, `${baseName}_Ditandatangani.png`, 'Gambar PNG (*.png)', { 'image/png': ['.png'] });
 }
 
 function loadImageFromDataUrl(dataUrl) {
@@ -1161,6 +1164,32 @@ function loadImageFromDataUrl(dataUrl) {
         img.onerror = reject;
         img.src = dataUrl;
     });
+}
+
+async function saveFileWithPicker(blob, defaultFilename, fileDescription, acceptMap) {
+    if ('showSaveFilePicker' in window) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: defaultFilename,
+                types: [{
+                    description: fileDescription,
+                    accept: acceptMap
+                }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return true;
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                throw new Error('Dibatalkan oleh pengguna');
+            }
+            console.warn('showSaveFilePicker gagal atau tidak didukung, menggunakan unduhan default:', err);
+        }
+    }
+    // Fallback jika browser tidak mendukung File System Access API
+    triggerDownload(blob, defaultFilename);
+    return true;
 }
 
 function triggerDownload(blob, filename) {

@@ -21,6 +21,7 @@ SignaDoc Pro adalah aplikasi desktop berbasis HTML/CSS/JavaScript yang ringan, m
 5. **✨ Tampilan UI Premium & Modern:**
    - Desain *Glassmorphism* dengan mode Gelap (Dark Mode) dan Terang (Light Mode).
    - Tampilan responsif dan mudah dipahami oleh semua kalangan.
+   - **Pemilihan Folder Penyimpanan (Save As):** Mendukung pemilihan direktori/folder tujuan penyimpanan secara bebas menggunakan *File System Access API*.
 6. **💻 Mode Desktop Aplikasi Windows:**
    - Dilengkapi dengan *launcher script* agar dapat dijalankan dalam mode jendela desktop terpisah (tanpa address bar atau tab browser), terasa seperti aplikasi native Windows pada umumnya.
 
@@ -50,7 +51,7 @@ Terdapat **2 cara mudah** untuk menjalankan aplikasi ini:
    - Klik dan geser tanda tangan untuk mengatur posisinya.
    - Tarik lingkaran biru di sudut kanan bawah tanda tangan untuk mengubah ukurannya.
    - Klik tombol merah dengan ikon **X** di sudut kanan atas tanda tangan untuk menghapusnya jika batal.
-5. **Unduh Dokumen:** Setelah selesai, klik tombol hijau **"Unduh Dokumen Resmi"** di pojok kiri bawah. File PDF hasil akhir yang telah tersertifikasi dengan tanda tangan digital Anda siap digunakan!
+5. **Simpan Dokumen:** Setelah selesai, klik tombol hijau **"Simpan Dokumen Ke..."** di pojok kiri bawah. Jendela penyimpanan Windows (*Save As*) akan terbuka sehingga Anda dapat memilih direktori/folder tujuan penyimpanan dan mengubah nama file hasil akhir sesuai keinginan Anda!
 
 ---
 
