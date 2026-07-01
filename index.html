@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignaDoc Pro - Aplikasi Tanda Tangan Dokumen Digital</title>
+    <meta name="description" content="Aplikasi Windows berbasis HTML sederhana dan modern untuk menambahkan tanda tangan digital pada dokumen PDF dan Gambar dengan mudah dan aman.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&family=Caveat:wght@600&family=Dancing+Script:wght@700&family=Great+Vibes&family=Pacifico&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- PDF.js & PDF-Lib Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+<body class="theme-dark">
+    <div class="app-container">
+        <!-- Top Navigation / Header -->
+        <header class="app-header">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-signature"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>SignaDoc <span>Pro</span></h1>
+                    <p class="tagline">Windows Document Signer</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="themeToggleBtn" class="btn btn-icon" title="Ubah Tema (Gelap/Terang)">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+                <button id="helpBtn" class="btn btn-secondary btn-sm" title="Panduan Penggunaan">
+                    <i class="fa-solid fa-circle-question"></i><span>Panduan</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Sidebar / Control Panel -->
+            <aside class="sidebar">
+                <div class="panel-section">
+                    <h2 class="panel-title"><i class="fa-solid fa-folder-open"></i> 1. Pilih Dokumen</h2>
+                    <div class="upload-zone" id="dropZone">
+                        <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden>
+                        <div class="upload-content">
+                            <div class="upload-icon-pulse">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <p class="upload-main-text">Klik atau Tarik File ke Sini</p>
+                            <p class="upload-sub-text">Mendukung PDF, PNG, JPG (Maks. 20MB)</p>
+                            <button class="btn btn-primary btn-sm mt-2" onclick="document.getElementById('fileInput').click()">
+                                <i class="fa-solid fa-plus"></i> Pilih File
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Document Info Card (Hidden by default) -->
+                    <div id="docInfoCard" class="doc-info-card hidden">
+                        <div class="doc-icon"><i class="fa-solid fa-file-pdf" id="docTypeIcon"></i></div>
+                        <div class="doc-details">
+                            <h3 id="docName">Nama Dokumen.pdf</h3>
+                            <span id="docMeta">PDF • 5 Halaman</span>
+                        </div>
+                        <button class="btn-remove-doc" id="closeDocBtn" title="Tutup Dokumen">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="panel-title"><i class="fa-solid fa-pen-nib"></i> 2. Tanda Tangan</h2>
+                    <p class="section-desc">Buat dan tambahkan tanda tangan ke atas dokumen.</p>
+                    
+                    <button id="openSigModalBtn" class="btn btn-accent btn-full">
+                        <i class="fa-solid fa-signature"></i> Buat Tanda Tangan Baru
+                    </button>
+
+                    <!-- Saved Signatures List -->
+                    <div class="saved-signatures-header mt-4">
+                        <span>Tanda Tangan Aktif</span>
+                        <span class="badge" id="sigCountBadge">0</span>
+                    </div>
+                    <div class="signatures-list" id="signaturesList">
+                        <div class="empty-state">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <p>Belum ada tanda tangan dibuat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section mt-auto">
+                    <h2 class="panel-title"><i class="fa-solid fa-file-export"></i> 3. Simpan & Ekspor</h2>
+                    <p class="section-desc">Unduh dokumen yang telah dibubuhi tanda tangan.</p>
+                    <button id="exportBtn" class="btn btn-success btn-full btn-lg" disabled>
+                        <i class="fa-solid fa-download"></i> Unduh Dokumen Resmi
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Document Viewer -->
+            <section class="viewer-container">
+                <!-- Viewer Toolbar -->
+                <div class="viewer-toolbar" id="viewerToolbar">
+                    <div class="toolbar-left">
+                        <div class="page-controls hidden" id="pageControls">
+                            <button id="prevPageBtn" class="btn btn-icon btn-sm" title="Halaman Sebelumnya" disabled>
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <div class="page-indicator">
+                                <span>Halaman</span>
+                                <input type="number" id="pageNumberInput" value="1" min="1" max="1" class="page-input">
+                                <span>dari <strong id="totalPagesCount">1</strong></span>
+                            </div>
+                            <button id="nextPageBtn" class="btn btn-icon btn-sm" title="Halaman Berikutnya" disabled>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="toolbar-center">
+                        <span class="viewer-status" id="viewerStatusText">Silakan unggah dokumen untuk mulai menandatangani</span>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <div class="zoom-controls hidden" id="zoomControls">
+                            <button id="zoomOutBtn" class="btn btn-icon btn-sm" title="Perkecil">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span id="zoomLevelText" class="zoom-text">100%</span>
+                            <button id="zoomInBtn" class="btn btn-icon btn-sm" title="Perbesar">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button id="zoomResetBtn" class="btn btn-icon btn-sm" title="Reset Zoom">
+                                <i class="fa-solid fa-arrows-to-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Viewer Canvas / Area -->
+                <div class="viewer-viewport" id="viewerViewport">
+                    <!-- Empty state placeholder -->
+                    <div class="viewer-empty-state" id="viewerEmptyState">
+                        <div class="empty-illustration">
+                            <div class="circle-bg"></div>
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <h3>Belum Ada Dokumen Terbuka</h3>
+                        <p>Pilih file PDF atau Gambar dari panel sebelah kiri atau tarik file langsung ke jendela ini.</p>
+                        <div class="quick-features">
+                            <div class="q-feat"><i class="fa-solid fa-check"></i> <span>Privasi 100% Aman (Offline / Lokal)</span></div>
+                            <div class="q-feat"><i class="fa-solid fa-check"></i> <span>Kualitas Ekspor Tinggi (Tanpa Kompresi)</span></div>
+                            <div class="q-feat"><i class="fa-solid fa-check"></i> <span>Mudah Digeser & Diatur Ukurannya</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Document Rendering Wrapper -->
+                    <div class="canvas-wrapper hidden" id="canvasWrapper">
+                        <!-- PDF.js or Image rendered here -->
+                        <canvas id="docCanvas"></canvas>
+                        <!-- Signature Overlays container (relative to canvas dimensions) -->
+                        <div class="overlays-layer" id="overlaysLayer"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: Create Signature -->
+    <div class="modal-backdrop hidden" id="sigModalBackdrop">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Buat Tanda Tangan</h3>
+                <button class="btn-close-modal" id="closeSigModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Signature Type Tabs -->
+                <div class="sig-tabs">
+                    <button class="tab-btn active" data-tab="draw"><i class="fa-solid fa-signature"></i> Gambar Langsung</button>
+                    <button class="tab-btn" data-tab="type"><i class="fa-solid fa-keyboard"></i> Ketik Nama</button>
+                    <button class="tab-btn" data-tab="upload"><i class="fa-solid fa-file-import"></i> Unggah Gambar</button>
+                </div>
+
+                <!-- Tab 1: Draw Signature -->
+                <div class="tab-content active" id="tab-draw">
+                    <div class="draw-tools">
+                        <div class="tool-group">
+                            <label>Warna Tinta:</label>
+                            <div class="color-picker-group">
+                                <button class="color-dot active" style="background: #000000;" data-color="#000000" title="Hitam"></button>
+                                <button class="color-dot" style="background: #1a56db;" data-color="#1a56db" title="Biru"></button>
+                                <button class="color-dot" style="background: #dc2626;" data-color="#dc2626" title="Merah"></button>
+                                <button class="color-dot" style="background: #047857;" data-color="#047857" title="Hijau"></button>
+                            </div>
+                        </div>
+                        <div class="tool-group">
+                            <label>Ketebalan:</label>
+                            <input type="range" id="penWidthSlider" min="1" max="8" value="3" class="slider">
+                            <span id="penWidthVal">3px</span>
+                        </div>
+                        <button class="btn btn-secondary btn-sm ml-auto" id="clearDrawBtn">
+                            <i class="fa-solid fa-eraser"></i> Bersihkan
+                        </button>
+                    </div>
+                    <div class="canvas-draw-container">
+                        <canvas id="sigDrawCanvas" width="500" height="220"></canvas>
+                        <div class="canvas-placeholder" id="drawPlaceholder">
+                            <i class="fa-solid fa-arrow-pointer"></i>
+                            <span>Gunakan mouse atau layar sentuh untuk menggambar tanda tangan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Type Signature -->
+                <div class="tab-content" id="tab-type">
+                    <div class="type-input-group">
+                        <input type="text" id="typedNameInput" placeholder="Ketik nama Anda di sini..." autocomplete="off">
+                        <div class="color-picker-group">
+                            <button class="color-dot active" style="background: #000000;" data-color="#000000" title="Hitam"></button>
+                            <button class="color-dot" style="background: #1a56db;" data-color="#1a56db" title="Biru"></button>
+                            <button class="color-dot" style="background: #dc2626;" data-color="#dc2626" title="Merah"></button>
+                        </div>
+                    </div>
+                    <div class="font-preview-grid" id="fontPreviewGrid">
+                        <div class="font-card active" data-font="Great Vibes">
+                            <span class="font-sample style-great-vibes">Tanda Tangan</span>
+                            <span class="font-name">Great Vibes (Elegan)</span>
+                        </div>
+                        <div class="font-card" data-font="Pacifico">
+                            <span class="font-sample style-pacifico">Tanda Tangan</span>
+                            <span class="font-name">Pacifico (Klasik)</span>
+                        </div>
+                        <div class="font-card" data-font="Caveat">
+                            <span class="font-sample style-caveat">Tanda Tangan</span>
+                            <span class="font-name">Caveat (Alami)</span>
+                        </div>
+                        <div class="font-card" data-font="Dancing Script">
+                            <span class="font-sample style-dancing">Tanda Tangan</span>
+                            <span class="font-name">Dancing Script (Dinamis)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Upload Image -->
+                <div class="tab-content" id="tab-upload">
+                    <div class="upload-sig-zone" id="uploadSigDrop">
+                        <input type="file" id="sigFileInput" accept=".png,.jpg,.jpeg,.webp" hidden>
+                        <i class="fa-solid fa-image"></i>
+                        <h4>Pilih Gambar Tanda Tangan</h4>
+                        <p>Disarankan menggunakan gambar format <strong>PNG transparan</strong></p>
+                        <button class="btn btn-secondary mt-3" onclick="document.getElementById('sigFileInput').click()">
+                            Cari File Gambar
+                        </button>
+                    </div>
+                    <div class="sig-preview-box hidden" id="sigImagePreviewBox">
+                        <img id="sigImagePreview" src="" alt="Preview Tanda Tangan">
+                        <button class="btn btn-danger btn-sm mt-2" id="removeUploadedSigBtn">
+                            <i class="fa-solid fa-trash"></i> Ganti Gambar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelSigBtn">Batal</button>
+                <button class="btn btn-primary" id="saveSigBtn">
+                    <i class="fa-solid fa-check"></i> Gunakan Tanda Tangan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Help / Guide -->
+    <div class="modal-backdrop hidden" id="helpModalBackdrop">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-info"></i> Panduan Penggunaan SignaDoc Pro</h3>
+                <button class="btn-close-modal" id="closeHelpModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body guide-body">
+                <div class="guide-step">
+                    <div class="step-num">1</div>
+                    <div class="step-text">
+                        <h4>Pilih atau Tarik Dokumen</h4>
+                        <p>Anda dapat memasukkan file <strong>PDF</strong> atau foto dokumen <strong>(PNG / JPG)</strong> ke dalam aplikasi ini. Seluruh pemrosesan dilakukan 100% lokal di komputer Windows Anda tanpa koneksi internet.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">2</div>
+                    <div class="step-text">
+                        <h4>Buat Tanda Tangan</h4>
+                        <p>Klik tombol <strong>"Buat Tanda Tangan Baru"</strong>. Anda bisa menggambar langsung dengan mouse/touchscreen, mengetik nama dengan font sambung estetis, atau mengunggah gambar tanda tangan yang sudah ada.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">3</div>
+                    <div class="step-text">
+                        <h4>Tempel & Atur Posisi</h4>
+                        <p>Klik pada tanda tangan yang sudah dibuat untuk menempelkannya ke atas dokumen. Anda bisa <strong>menggeser (drag)</strong> posisinya, serta <strong>memperbesar atau memperkecil</strong> ukurannya menggunakan titik sudut di sekeliling tanda tangan.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">4</div>
+                    <div class="step-text">
+                        <h4>Unduh Hasil Akhir</h4>
+                        <p>Klik tombol hijau <strong>"Unduh Dokumen Resmi"</strong>. Jika dokumen berupa PDF, tanda tangan akan tertanam secara digital ke dalam struktur PDF asli dengan kualitas sempurna.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary ml-auto" id="closeHelpBtn">Mengerti & Mulai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
