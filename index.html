@@ -356,17 +356,24 @@
                             <h4 style="font-size:0.95rem; font-weight:600; color:var(--text-main); margin-bottom:0.75rem;"><i class="fa-solid fa-gear" style="color:#3b82f6;"></i> Pilih Format Output Word (.doc):</h4>
                             <div style="display:flex; flex-direction:column; gap:0.75rem;">
                                 <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
-                                    <input type="radio" name="wordExportMode" value="smart-text" checked style="margin-top:3px;">
+                                    <input type="radio" name="wordExportMode" value="hybrid-layout" checked style="margin-top:3px;">
                                     <div>
-                                        <strong style="font-size:0.9rem; color:var(--text-main);">Ekstraksi Teks & Judul Pintar (Dapat Diedit / Ketik Ulang)</strong>
-                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Mengekstrak teks kalimat dan mendeteksi otomatis ukuran font untuk judul (Heading) agar bisa diedit di Word. (Gambar & tanda tangan tidak ikut ter-ekstrak).</p>
+                                        <strong style="font-size:0.9rem; color:#60a5fa;">⭐ Tata Letak Identik (Teks Diedit + Gambar & Tanda Tangan Asli) - REKOMENDASI</strong>
+                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Menggabungkan teks yang bisa diedit (tulisan & judul) dengan seluruh foto citra drone, peta, dan tanda tangan pada posisi yang 100% persis seperti PDF asli!</p>
+                                    </div>
+                                </label>
+                                <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
+                                    <input type="radio" name="wordExportMode" value="smart-text" style="margin-top:3px;">
+                                    <div>
+                                        <strong style="font-size:0.9rem; color:var(--text-main);">Teks & Judul Saja (Tanpa Gambar)</strong>
+                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Hanya mengambil teks tulisan kalimat dan judul saja (cocok untuk menyalin kutipan teks murni dengan cepat).</p>
                                     </div>
                                 </label>
                                 <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
                                     <input type="radio" name="wordExportMode" value="visual-snapshot" style="margin-top:3px;">
                                     <div>
-                                        <strong style="font-size:0.9rem; color:var(--text-main);">Salinan Visual 100% Persis (Visual Snapshot / Arsip Gambar)</strong>
-                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Memasukkan seluruh tampilan asli halaman PDF (termasuk foto citra drone, peta, dan tanda tangan) secara 100% identik ke dalam Word tanpa ada yang hilang!</p>
+                                        <strong style="font-size:0.9rem; color:var(--text-main);">Salinan Visual 100% Persis (Visual Snapshot / Gambar Halaman)</strong>
+                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Menjadikan setiap halaman dokumen sebagai foto visual utuh (cocok untuk arsip cetak atau dokumen yang tidak perlu disunting teksnya).</p>
                                     </div>
                                 </label>
                             </div>

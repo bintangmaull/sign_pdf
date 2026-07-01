@@ -267,13 +267,39 @@ async function convertImagesToPdf() {
     showToast(`Berhasil menyatukan ${state.convertImages.length} gambar menjadi PDF!`, 'success');
 }
 
+function getSliceAsBase64(pageCanvas, yStart, yEnd, width) {
+    const sliceH = Math.max(10, Math.round(yEnd - yStart));
+    const sliceW = Math.max(10, Math.round(width));
+    if (sliceH <= 15) return null;
+    
+    const sliceCanvas = document.createElement('canvas');
+    sliceCanvas.width = sliceW;
+    sliceCanvas.height = sliceH;
+    const ctx = sliceCanvas.getContext('2d');
+    ctx.drawImage(pageCanvas, 0, yStart, sliceW, sliceH, 0, 0, sliceW, sliceH);
+    
+    const imgData = ctx.getImageData(0, 0, sliceW, sliceH).data;
+    let contentPixels = 0;
+    const step = Math.max(1, Math.floor((imgData.length / 4) / 1000));
+    for (let i = 0; i < imgData.length; i += 4 * step) {
+        const r = imgData[i], g = imgData[i+1], b = imgData[i+2], a = imgData[i+3];
+        if (a > 20 && (r < 245 || g < 245 || b < 245)) {
+            contentPixels++;
+            if (contentPixels > 6) {
+                return sliceCanvas.toDataURL('image/jpeg', 0.88);
+            }
+        }
+    }
+    return null;
+}
+
 async function convertPdfToWord() {
     if (!state.rawBuffer) return;
     
     const modeEl = document.querySelector('input[name="wordExportMode"]:checked');
-    const exportMode = modeEl ? modeEl.value : 'smart-text';
+    const exportMode = modeEl ? modeEl.value : 'hybrid-layout';
     
-    showToast(exportMode === 'visual-snapshot' ? 'Membuat arsip visual Word (100% persis)...' : 'Mengekstrak teks & judul ke dokumen Word...', 'info');
+    showToast(exportMode === 'hybrid-layout' ? 'Mempersiapkan tata letak identik (Teks + Gambar Asli)...' : (exportMode === 'visual-snapshot' ? 'Membuat arsip visual Word (100% persis)...' : 'Mengekstrak teks & judul ke dokumen Word...'), 'info');
     
     const loadingTask = pdfjsLib.getDocument({ data: state.rawBuffer.slice(0) });
     const pdfDoc = await loadingTask.promise;
@@ -310,7 +336,95 @@ async function convertPdfToWord() {
             const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.88);
             htmlContent += `<div class="visual-page"><img src="${jpegDataUrl}" alt="Halaman ${i}"/></div>`;
         }
+    } else if (exportMode === 'hybrid-layout') {
+        for (let i = 1; i <= totalPages; i++) {
+            if (i > 1) htmlContent += '<div class="page-break"></div>';
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: 1.8 });
+            
+            // Render full page canvas for image slicing
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = viewport.width;
+            pageCanvas.height = viewport.height;
+            const pageCtx = pageCanvas.getContext('2d');
+            await page.render({ canvasContext: pageCtx, viewport: viewport }).promise;
+            
+            const textContent = await page.getTextContent();
+            const unscaledHeight = viewport.height / 1.8;
+            
+            let lines = [];
+            let currentLine = null;
+            
+            textContent.items.forEach(item => {
+                const str = item.str;
+                if (!str || !str.trim()) return;
+                const ty = item.transform[5];
+                const fontSize = Math.round(Math.hypot(item.transform[2], item.transform[3]) || 11);
+                const isBold = (item.fontName && item.fontName.toLowerCase().includes('bold')) || fontSize >= 14;
+                const topY = (unscaledHeight - ty) * 1.8;
+                
+                if (!currentLine || Math.abs(currentLine.topY - topY) > 10) {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = {
+                        topY: topY,
+                        bottomY: topY + (fontSize * 1.8),
+                        text: str,
+                        fontSize: fontSize,
+                        isBold: isBold
+                    };
+                } else {
+                    if (!currentLine.text.endsWith(' ') && !str.startsWith(' ')) {
+                        currentLine.text += ' ';
+                    }
+                    currentLine.text += str;
+                    if (fontSize > currentLine.fontSize) currentLine.fontSize = fontSize;
+                    if (isBold) currentLine.isBold = true;
+                    if (topY + (fontSize * 1.8) > currentLine.bottomY) currentLine.bottomY = topY + (fontSize * 1.8);
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            
+            // Sort lines vertically from top to bottom
+            lines.sort((a, b) => a.topY - b.topY);
+            
+            if (lines.length === 0) {
+                const sliceUrl = getSliceAsBase64(pageCanvas, 0, viewport.height, viewport.width);
+                if (sliceUrl) htmlContent += `<div class="visual-page"><img src="${sliceUrl}" alt="Halaman ${i}"/></div>`;
+            } else {
+                let lastY = 0;
+                lines.forEach((line) => {
+                    // Check for graphic/image gap above this text line
+                    if (line.topY - lastY > 45) {
+                        const sliceUrl = getSliceAsBase64(pageCanvas, lastY + 2, line.topY - 4, viewport.width);
+                        if (sliceUrl) htmlContent += `<div class="visual-page"><img src="${sliceUrl}" alt="Grafik Halaman ${i}"/></div>`;
+                    }
+                    
+                    const txt = line.text.trim();
+                    if (txt) {
+                        if (line.fontSize >= 18 || (line.fontSize >= 16 && line.isBold)) {
+                            htmlContent += `<h1>${txt}</h1>`;
+                        } else if (line.fontSize >= 14 || (line.fontSize >= 13 && line.isBold)) {
+                            htmlContent += `<h2>${txt}</h2>`;
+                        } else if (line.fontSize >= 12 && line.isBold) {
+                            htmlContent += `<h3>${txt}</h3>`;
+                        } else if (txt.startsWith('•') || txt.startsWith('- ') || txt.startsWith('* ')) {
+                            htmlContent += `<p style="margin-left: 20pt; text-indent: -10pt;">${txt}</p>`;
+                        } else {
+                            htmlContent += `<p>${txt}</p>`;
+                        }
+                    }
+                    lastY = line.bottomY;
+                });
+                
+                // Check gap below last text line to bottom of page
+                if (viewport.height - lastY > 45) {
+                    const sliceUrl = getSliceAsBase64(pageCanvas, lastY + 4, viewport.height, viewport.width);
+                    if (sliceUrl) htmlContent += `<div class="visual-page"><img src="${sliceUrl}" alt="Grafik Bawah Halaman ${i}"/></div>`;
+                }
+            }
+        }
     } else {
+        // Smart Text only mode
         for (let i = 1; i <= totalPages; i++) {
             if (i > 1) htmlContent += '<div class="page-break"></div>';
             const page = await pdfDoc.getPage(i);
@@ -365,7 +479,10 @@ async function convertPdfToWord() {
     
     htmlContent += '</body></html>';
     
-    const suffix = exportMode === 'visual-snapshot' ? '_Visual_Persis.doc' : '_Teks_Diedit.doc';
+    let suffix = '_Tata_Letak_Identik.doc';
+    if (exportMode === 'visual-snapshot') suffix = '_Visual_Persis.doc';
+    else if (exportMode === 'smart-text') suffix = '_Teks_Diedit.doc';
+    
     const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
     await saveFileWithPicker(
         blob, 
