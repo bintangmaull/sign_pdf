@@ -347,10 +347,29 @@
                                 <button id="executeConvertBtn" class="btn btn-primary btn-lg" disabled><i class="fa-solid fa-wand-magic-sparkles"></i> Mulai Konversi & Simpan</button>
                             </div>
                         </div>
-                        <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;">
+                        <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
                             <button class="btn btn-secondary converter-tab-btn active" data-mode="pdf-to-img"><i class="fa-solid fa-file-image"></i> PDF ke Gambar</button>
                             <button class="btn btn-secondary converter-tab-btn" data-mode="img-to-pdf"><i class="fa-solid fa-images"></i> Gambar ke PDF</button>
                             <button class="btn btn-secondary converter-tab-btn" data-mode="pdf-to-word"><i class="fa-solid fa-file-word"></i> PDF ke Word (.doc)</button>
+                        </div>
+                        <div id="wordModeSelector" class="hidden" style="max-width:800px; width:100%; margin: 0 auto 1.5rem; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:10px; padding:1.25rem;">
+                            <h4 style="font-size:0.95rem; font-weight:600; color:var(--text-main); margin-bottom:0.75rem;"><i class="fa-solid fa-gear" style="color:#3b82f6;"></i> Pilih Format Output Word (.doc):</h4>
+                            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                                <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
+                                    <input type="radio" name="wordExportMode" value="smart-text" checked style="margin-top:3px;">
+                                    <div>
+                                        <strong style="font-size:0.9rem; color:var(--text-main);">Ekstraksi Teks & Judul Pintar (Dapat Diedit / Ketik Ulang)</strong>
+                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Mengekstrak teks kalimat dan mendeteksi otomatis ukuran font untuk judul (Heading) agar bisa diedit di Word. (Gambar & tanda tangan tidak ikut ter-ekstrak).</p>
+                                    </div>
+                                </label>
+                                <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
+                                    <input type="radio" name="wordExportMode" value="visual-snapshot" style="margin-top:3px;">
+                                    <div>
+                                        <strong style="font-size:0.9rem; color:var(--text-main);">Salinan Visual 100% Persis (Visual Snapshot / Arsip Gambar)</strong>
+                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Memasukkan seluruh tampilan asli halaman PDF (termasuk foto citra drone, peta, dan tanda tangan) secara 100% identik ke dalam Word tanpa ada yang hilang!</p>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                         <div id="converterDropZone" class="upload-zone" style="max-width:800px; width:100%; margin: 0 auto 1.5rem;" onclick="document.getElementById('converterFileInput').click();">
                             <i class="fa-solid fa-cloud-arrow-up upload-icon-pulse" style="color:#8b5cf6;"></i>

@@ -28,6 +28,12 @@ function setConverterMode(mode) {
     state.convertImages = [];
     state.rawBuffer = null;
     
+    const wordSelector = document.getElementById('wordModeSelector');
+    if (wordSelector) {
+        if (mode === 'pdf-to-word') wordSelector.classList.remove('hidden');
+        else wordSelector.classList.add('hidden');
+    }
+    
     if (mode === 'pdf-to-img') {
         if (descEl) descEl.textContent = 'Ekstrak seluruh halaman dokumen PDF menjadi file gambar berkualitas tinggi (PNG / JPG). Jika lebih dari 1 halaman, akan dikemas dalam file ZIP.';
         if (inputEl) { inputEl.accept = '.pdf,application/pdf'; inputEl.multiple = false; }
@@ -263,7 +269,11 @@ async function convertImagesToPdf() {
 
 async function convertPdfToWord() {
     if (!state.rawBuffer) return;
-    showToast('Mengekstrak teks dan membuat dokumen Word...', 'info');
+    
+    const modeEl = document.querySelector('input[name="wordExportMode"]:checked');
+    const exportMode = modeEl ? modeEl.value : 'smart-text';
+    
+    showToast(exportMode === 'visual-snapshot' ? 'Membuat arsip visual Word (100% persis)...' : 'Mengekstrak teks & judul ke dokumen Word...', 'info');
     
     const loadingTask = pdfjsLib.getDocument({ data: state.rawBuffer.slice(0) });
     const pdfDoc = await loadingTask.promise;
@@ -275,42 +285,91 @@ async function convertPdfToWord() {
         <head><meta charset="utf-8"><title>${baseName}</title>
         <style>
             body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #000000; padding: 2cm; }
-            p { margin-bottom: 12pt; text-align: justify; }
+            p { margin-bottom: 10pt; text-align: justify; line-height: 1.5; }
+            h1 { font-size: 18pt; font-weight: bold; color: #0f172a; margin-top: 16pt; margin-bottom: 8pt; }
+            h2 { font-size: 14pt; font-weight: bold; color: #1e293b; margin-top: 14pt; margin-bottom: 6pt; }
+            h3 { font-size: 12pt; font-weight: bold; color: #334155; margin-top: 10pt; margin-bottom: 4pt; }
             .page-break { page-break-before: always; }
+            .visual-page { text-align: center; margin-bottom: 24pt; }
+            .visual-page img { max-width: 100%; width: 620px; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         </style>
         </head><body>
     `;
     
-    for (let i = 1; i <= totalPages; i++) {
-        if (i > 1) htmlContent += '<div class="page-break"></div>';
-        const page = await pdfDoc.getPage(i);
-        const textContent = await page.getTextContent();
-        
-        let pageText = '';
-        let lastY = null;
-        
-        textContent.items.forEach(item => {
-            const str = item.str;
-            const currentY = item.transform[5];
+    if (exportMode === 'visual-snapshot') {
+        for (let i = 1; i <= totalPages; i++) {
+            if (i > 1) htmlContent += '<div class="page-break"></div>';
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: 1.8 });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
             
-            if (lastY !== null && Math.abs(currentY - lastY) > 15) {
-                pageText += '</p><p>';
-            } else if (pageText.length > 0 && !pageText.endsWith(' ')) {
-                pageText += ' ';
-            }
-            pageText += str;
-            lastY = currentY;
-        });
-        
-        htmlContent += `<p>${pageText}</p>`;
+            const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+            htmlContent += `<div class="visual-page"><img src="${jpegDataUrl}" alt="Halaman ${i}"/></div>`;
+        }
+    } else {
+        for (let i = 1; i <= totalPages; i++) {
+            if (i > 1) htmlContent += '<div class="page-break"></div>';
+            const page = await pdfDoc.getPage(i);
+            const textContent = await page.getTextContent();
+            
+            let lines = [];
+            let currentLine = null;
+            
+            textContent.items.forEach(item => {
+                const str = item.str;
+                if (!str || !str.trim()) return;
+                const ty = item.transform[5];
+                const fontSize = Math.round(Math.hypot(item.transform[2], item.transform[3]) || 11);
+                const isBold = (item.fontName && item.fontName.toLowerCase().includes('bold')) || fontSize >= 14;
+                
+                if (!currentLine || Math.abs(currentLine.y - ty) > 6) {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = {
+                        y: ty,
+                        text: str,
+                        fontSize: fontSize,
+                        isBold: isBold
+                    };
+                } else {
+                    if (!currentLine.text.endsWith(' ') && !str.startsWith(' ')) {
+                        currentLine.text += ' ';
+                    }
+                    currentLine.text += str;
+                    if (fontSize > currentLine.fontSize) currentLine.fontSize = fontSize;
+                    if (isBold) currentLine.isBold = true;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            
+            lines.forEach(line => {
+                const txt = line.text.trim();
+                if (!txt) return;
+                if (line.fontSize >= 18 || (line.fontSize >= 16 && line.isBold)) {
+                    htmlContent += `<h1>${txt}</h1>`;
+                } else if (line.fontSize >= 14 || (line.fontSize >= 13 && line.isBold)) {
+                    htmlContent += `<h2>${txt}</h2>`;
+                } else if (line.fontSize >= 12 && line.isBold) {
+                    htmlContent += `<h3>${txt}</h3>`;
+                } else if (txt.startsWith('•') || txt.startsWith('- ') || txt.startsWith('* ')) {
+                    htmlContent += `<p style="margin-left: 20pt; text-indent: -10pt;">${txt}</p>`;
+                } else {
+                    htmlContent += `<p>${txt}</p>`;
+                }
+            });
+        }
     }
     
     htmlContent += '</body></html>';
     
+    const suffix = exportMode === 'visual-snapshot' ? '_Visual_Persis.doc' : '_Teks_Diedit.doc';
     const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
     await saveFileWithPicker(
         blob, 
-        `${baseName}_Diekstrak.doc`, 
+        `${baseName}${suffix}`, 
         'Dokumen Microsoft Word (*.doc)', 
         { 'application/msword': ['.doc'] }
     );
