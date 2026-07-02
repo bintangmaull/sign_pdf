@@ -278,27 +278,52 @@ async function convertImagesToPdf() {
 function getSliceAsBase64(pageCanvas, yStart, yEnd, width) {
     const sliceH = Math.max(10, Math.round(yEnd - yStart));
     const sliceW = Math.max(10, Math.round(width));
-    if (sliceH <= 15) return null;
+    if (sliceH <= 20) return null;
     
-    const sliceCanvas = document.createElement('canvas');
-    sliceCanvas.width = sliceW;
-    sliceCanvas.height = sliceH;
-    const ctx = sliceCanvas.getContext('2d');
-    ctx.drawImage(pageCanvas, 0, yStart, sliceW, sliceH, 0, 0, sliceW, sliceH);
+    const ctx = pageCanvas.getContext('2d');
+    const imgData = ctx.getImageData(0, Math.max(0, Math.round(yStart)), sliceW, sliceH).data;
     
-    const imgData = ctx.getImageData(0, 0, sliceW, sliceH).data;
+    let minX = sliceW, maxX = 0, minY = sliceH, maxY = 0;
     let contentPixels = 0;
-    const step = Math.max(1, Math.floor((imgData.length / 4) / 1000));
-    for (let i = 0; i < imgData.length; i += 4 * step) {
-        const r = imgData[i], g = imgData[i+1], b = imgData[i+2], a = imgData[i+3];
-        if (a > 20 && (r < 245 || g < 245 || b < 245)) {
-            contentPixels++;
-            if (contentPixels > 6) {
-                return sliceCanvas.toDataURL('image/jpeg', 0.88);
+    
+    for (let y = 0; y < sliceH; y += 2) {
+        for (let x = 0; x < sliceW; x += 2) {
+            const idx = (y * sliceW + x) * 4;
+            const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2], a = imgData[idx+3];
+            if (a > 30 && (r < 240 || g < 240 || b < 240)) {
+                contentPixels++;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
             }
         }
     }
-    return null;
+    
+    if (contentPixels < 40) return null;
+    
+    const cropW = maxX - minX + 1;
+    const cropH = maxY - minY + 1;
+    if (cropW < 15 || cropH < 15) return null;
+    
+    const padX = Math.max(0, minX - 6);
+    const padY = Math.max(0, Math.round(yStart) + minY - 6);
+    const finalW = Math.min(sliceW - padX, cropW + 12);
+    const finalH = Math.min(pageCanvas.height - padY, cropH + 12);
+    
+    const sliceCanvas = document.createElement('canvas');
+    sliceCanvas.width = finalW;
+    sliceCanvas.height = finalH;
+    const sCtx = sliceCanvas.getContext('2d');
+    sCtx.fillStyle = '#ffffff';
+    sCtx.fillRect(0, 0, finalW, finalH);
+    sCtx.drawImage(pageCanvas, padX, padY, finalW, finalH, 0, 0, finalW, finalH);
+    
+    const displayW = Math.round(finalW / 1.8);
+    return {
+        url: sliceCanvas.toDataURL('image/jpeg', 0.88),
+        width: displayW
+    };
 }
 
 async function convertPdfToWord() {
@@ -318,14 +343,14 @@ async function convertPdfToWord() {
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
         <head><meta charset="utf-8"><title>${baseName}</title>
         <style>
-            body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #000000; padding: 2cm; }
-            p { margin-bottom: 10pt; text-align: justify; line-height: 1.5; }
-            h1 { font-size: 18pt; font-weight: bold; color: #0f172a; margin-top: 16pt; margin-bottom: 8pt; }
-            h2 { font-size: 14pt; font-weight: bold; color: #1e293b; margin-top: 14pt; margin-bottom: 6pt; }
-            h3 { font-size: 12pt; font-weight: bold; color: #334155; margin-top: 10pt; margin-bottom: 4pt; }
+            body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; line-height: 1.35; color: #000000; padding: 1.5cm; }
+            p { margin-top: 0; margin-bottom: 6pt; text-align: justify; line-height: 1.35; }
+            h1 { font-size: 18pt; font-weight: bold; color: #0f172a; margin-top: 12pt; margin-bottom: 6pt; }
+            h2 { font-size: 14pt; font-weight: bold; color: #1e293b; margin-top: 10pt; margin-bottom: 4pt; }
+            h3 { font-size: 12pt; font-weight: bold; color: #334155; margin-top: 8pt; margin-bottom: 4pt; }
             .page-break { page-break-before: always; }
-            .visual-page { text-align: center; margin-bottom: 24pt; }
-            .visual-page img { max-width: 100%; width: 620px; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+            .visual-page { text-align: center; margin: 8pt auto; }
+            .visual-page img { max-width: 100%; height: auto; border: none; }
         </style>
         </head><body>
     `;
@@ -342,7 +367,7 @@ async function convertPdfToWord() {
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
             
             const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.88);
-            htmlContent += `<div class="visual-page"><img src="${jpegDataUrl}" alt="Halaman ${i}"/></div>`;
+            htmlContent += `<div class="visual-page"><img src="${jpegDataUrl}" style="width: ${Math.round(viewport.width/1.8)}px;" alt="Halaman ${i}"/></div>`;
         }
     } else if (exportMode === 'hybrid-layout') {
         for (let i = 1; i <= totalPages; i++) {
@@ -350,7 +375,6 @@ async function convertPdfToWord() {
             const page = await pdfDoc.getPage(i);
             const viewport = page.getViewport({ scale: 1.8 });
             
-            // Render full page canvas for image slicing
             const pageCanvas = document.createElement('canvas');
             pageCanvas.width = viewport.width;
             pageCanvas.height = viewport.height;
@@ -369,13 +393,17 @@ async function convertPdfToWord() {
                 const ty = item.transform[5];
                 const fontSize = Math.round(Math.hypot(item.transform[2], item.transform[3]) || 11);
                 const isBold = (item.fontName && item.fontName.toLowerCase().includes('bold')) || fontSize >= 14;
-                const topY = (unscaledHeight - ty) * 1.8;
                 
-                if (!currentLine || Math.abs(currentLine.topY - topY) > 10) {
+                const baselineY = (unscaledHeight - ty) * 1.8;
+                const topY = baselineY - (fontSize * 1.8 * 1.05);
+                const bottomY = baselineY + (fontSize * 1.8 * 0.25);
+                
+                if (!currentLine || Math.abs(currentLine.baselineY - baselineY) > 12) {
                     if (currentLine) lines.push(currentLine);
                     currentLine = {
+                        baselineY: baselineY,
                         topY: topY,
-                        bottomY: topY + (fontSize * 1.8),
+                        bottomY: bottomY,
                         text: str,
                         fontSize: fontSize,
                         isBold: isBold
@@ -387,24 +415,23 @@ async function convertPdfToWord() {
                     currentLine.text += str;
                     if (fontSize > currentLine.fontSize) currentLine.fontSize = fontSize;
                     if (isBold) currentLine.isBold = true;
-                    if (topY + (fontSize * 1.8) > currentLine.bottomY) currentLine.bottomY = topY + (fontSize * 1.8);
+                    if (topY < currentLine.topY) currentLine.topY = topY;
+                    if (bottomY > currentLine.bottomY) currentLine.bottomY = bottomY;
                 }
             });
             if (currentLine) lines.push(currentLine);
             
-            // Sort lines vertically from top to bottom
             lines.sort((a, b) => a.topY - b.topY);
             
             if (lines.length === 0) {
-                const sliceUrl = getSliceAsBase64(pageCanvas, 0, viewport.height, viewport.width);
-                if (sliceUrl) htmlContent += `<div class="visual-page"><img src="${sliceUrl}" alt="Halaman ${i}"/></div>`;
+                const sliceObj = getSliceAsBase64(pageCanvas, 0, viewport.height, viewport.width);
+                if (sliceObj) htmlContent += `<div class="visual-page"><img src="${sliceObj.url}" style="width: ${sliceObj.width}px;" alt="Halaman ${i}"/></div>`;
             } else {
                 let lastY = 0;
                 lines.forEach((line) => {
-                    // Check for graphic/image gap above this text line
-                    if (line.topY - lastY > 45) {
-                        const sliceUrl = getSliceAsBase64(pageCanvas, lastY + 2, line.topY - 4, viewport.width);
-                        if (sliceUrl) htmlContent += `<div class="visual-page"><img src="${sliceUrl}" alt="Grafik Halaman ${i}"/></div>`;
+                    if (line.topY - lastY > 40) {
+                        const sliceObj = getSliceAsBase64(pageCanvas, lastY + 4, line.topY - 4, viewport.width);
+                        if (sliceObj) htmlContent += `<div class="visual-page"><img src="${sliceObj.url}" style="width: ${sliceObj.width}px;" alt="Grafik Halaman ${i}"/></div>`;
                     }
                     
                     const txt = line.text.trim();
@@ -424,10 +451,9 @@ async function convertPdfToWord() {
                     lastY = line.bottomY;
                 });
                 
-                // Check gap below last text line to bottom of page
-                if (viewport.height - lastY > 45) {
-                    const sliceUrl = getSliceAsBase64(pageCanvas, lastY + 4, viewport.height, viewport.width);
-                    if (sliceUrl) htmlContent += `<div class="visual-page"><img src="${sliceUrl}" alt="Grafik Bawah Halaman ${i}"/></div>`;
+                if (viewport.height - lastY > 40) {
+                    const sliceObj = getSliceAsBase64(pageCanvas, lastY + 4, viewport.height, viewport.width);
+                    if (sliceObj) htmlContent += `<div class="visual-page"><img src="${sliceObj.url}" style="width: ${sliceObj.width}px;" alt="Grafik Bawah Halaman ${i}"/></div>`;
                 }
             }
         }
