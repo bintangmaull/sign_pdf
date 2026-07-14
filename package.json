@@ -1,0 +1,45 @@
+{
+  "name": "pdf-editor-pro",
+  "productName": "PDF Editor Pro",
+  "version": "1.0.0",
+  "description": "Windows Offline Portable PDF Suite - All-in-One PDF Editor & Tools",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:portable": "electron-builder --win portable"
+  },
+  "keywords": [
+    "pdf",
+    "editor",
+    "portable",
+    "windows",
+    "offline"
+  ],
+  "author": "PDF Editor Studio",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.pdfeditorpro.windows",
+    "productName": "PDF Editor Pro",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "PDF_Editor_Pro_Portable_v${version}.exe"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "css/**/*",
+      "js/**/*"
+    ]
+  }
+}

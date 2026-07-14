@@ -11,11 +11,6 @@ if (typeof pdfjsLib !== 'undefined') {
 async function handleEditorFileSelect(file) {
     if (!file) return;
     
-    if (file.size > 20 * 1024 * 1024) {
-        showToast('Ukuran file terlalu besar! Maksimal 20MB.', 'error');
-        return;
-    }
-    
     state.docName = file.name;
     const fileType = file.type;
     const fileNameLower = file.name.toLowerCase();

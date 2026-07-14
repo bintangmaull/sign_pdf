@@ -40,39 +40,36 @@ Agar kode sangat rapi, mudah dipelajari, dan mudah dikembangkan Tanpa file monol
 ```
 e:\Iseng\TTD\
 │
-├── index.html                  # Shell UI Utama (Dashboard 7 Alat + Workspace Kontainer)
-├── Jalankan_PDF_Editor.bat     # Windows Desktop App Launcher (Mode Jendela Asli Windows)
+├── index.html                  # Shell UI Utama (Dashboard 6 Alat + Workspace Kontainer)
+├── PDF_Editor.bat              # Windows Desktop App Launcher (Mode Jendela Asli Windows)
+├── PDF_Editor_Silent.vbs       # Launcher Desktop Tanpa Jendela Hitam CMD (Portable Instan)
+├── package.json                # Konfigurasi Build Aplikasi Portable (.exe) dengan Electron
+├── main.js                     # Electron Main Process Entry Point
 ├── README.md                   # Dokumentasi Lengkap
 │
 ├── css/                        # Folder Modul Styling
-│   ├── variables.css           # Token warna, tema (Dark/Light), dan font
-│   ├── layout.css              # Layout Dashboard, Sidebar, Header, dan Grid
-│   ├── components.css          # Kartu alat, tombol, badge, tab, dan upload zone
-│   ├── editor.css              # Canvas interactive editor & overlay interaktif
-│   ├── tools.css               # Tampilan khusus Merge, Compress, & Remove Pages
-│   └── modals.css              # Modal dialog, langkah panduan, dan Toast Alerts
-│
-└── js/                         # Folder Modul Logika JavaScript
-    ├── config.js               # State global aplikasi & registry elemen DOM
-    ├── utils.js                # Helper Toast, konversi byte, dan Windows Save As API
-    ├── tool-editor.js          # Modul 1: Edit PDF, Tanda Tangan, Teks, & Stempel
-    ├── tool-merge.js           # Modul 2: Gabung PDF (Merge)
-    ├── tool-pages.js           # Modul 3: Hapus Halaman (Remove Pages)
-    ├── tool-compress.js        # Modul 4: Kompres PDF (Compress)
-    ├── tool-converter.js       # Modul 5, 6, 7: PDF <-> Image, PDF to Word, & ZIP Export
-    └── main.js                 # Router navigasi dasbor dan inisialisasi aplikasi
+├── js/                         # Folder Modul Logika JavaScript
 ```
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi di Windows
+## 🚀 Cara Menjalankan Aplikasi di Windows (Tanpa Instalasi)
 
-### Cara 1: Menggunakan Launcher Desktop Windows (Sangat Disarankan)
-1. Buka direktori folder aplikasi ini (`e:\Iseng\TTD`).
-2. Klik ganda pada file **`Jalankan_PDF_Editor.bat`**.
-3. Aplikasi akan otomatis terbuka dalam jendela desktop profesional (tanpa tampilan tab atau address bar browser), terasa seperti aplikasi native Windows pada umumnya!
+### Cara 1: Launcher Desktop Tanpa Jendela Hitam (Sangat Disarankan - Langsung Pakai)
+1. Klik ganda pada file **`PDF_Editor_Silent.vbs`**.
+2. Aplikasi akan otomatis terbuka di jendela desktop profesional Windows **tanpa muncul jendela hitam terminal/CMD sama sekali**.
 
-### Cara 2: Membuka Langsung Melalui Browser
+### Cara 2: Membangun File Portable Mandiri (`.EXE` Tunggal)
+Jika Anda ingin memiliki **1 file `.exe` mandiri** (berisi engine internal sendiri) yang bisa disimpan di Flashdisk atau dijalankan di PC mana pun tanpa bergantung pada browser:
+1. Pastikan **Node.js** sudah terinstal di komputer Anda.
+2. Buka terminal di folder aplikasi ini dan jalankan perintah:
+   ```bash
+   npm install
+   npm run build:portable
+   ```
+3. File executable portable mandiri siap digunakan di dalam folder **`dist/`**!
+
+### Cara 3: Membuka Langsung Melalui Browser
 1. Klik ganda pada file **`index.html`** atau klik kanan -> *Open with* -> pilih Google Chrome, Microsoft Edge, atau Firefox.
 
 ---

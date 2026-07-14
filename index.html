@@ -44,6 +44,9 @@
                 <button id="themeToggleBtn" class="btn btn-icon" title="Ganti Tema (Gelap/Terang)">
                     <i class="fa-solid fa-moon"></i>
                 </button>
+                <button id="donateBtn" class="btn btn-sm" style="background: linear-gradient(135deg, #f59e0b, #ec4899); border: none; color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);">
+                    <i class="fa-solid fa-heart"></i> <span>Donasi</span>
+                </button>
                 <button id="helpBtn" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-circle-question"></i> <span>Panduan</span>
                 </button>
@@ -106,14 +109,6 @@
                         <div class="tool-info">
                             <h3>Gambar ke PDF</h3>
                             <p>Ubah foto dokumen, KTP, atau gambar apapun (JPG, PNG, WebP) menjadi dokumen PDF standar profesional.</p>
-                        </div>
-                    </div>
-
-                    <div class="tool-card" data-tool="converter" onclick="setTimeout(()=>setConverterMode('pdf-to-word'),50);">
-                        <div class="tool-icon" style="color:#3b82f6; background:rgba(59,130,246,0.15);"><i class="fa-solid fa-file-word"></i></div>
-                        <div class="tool-info">
-                            <h3>PDF ke Word (.doc)</h3>
-                            <p>Ekstrak teks dan struktur kalimat dari dalam PDF menjadi dokumen Word yang bisa diedit di Microsoft Office.</p>
                         </div>
                     </div>
                 </div>
@@ -350,33 +345,6 @@
                         <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
                             <button class="btn btn-secondary converter-tab-btn active" data-mode="pdf-to-img"><i class="fa-solid fa-file-image"></i> PDF ke Gambar</button>
                             <button class="btn btn-secondary converter-tab-btn" data-mode="img-to-pdf"><i class="fa-solid fa-images"></i> Gambar ke PDF</button>
-                            <button class="btn btn-secondary converter-tab-btn" data-mode="pdf-to-word"><i class="fa-solid fa-file-word"></i> PDF ke Word (.doc)</button>
-                        </div>
-                        <div id="wordModeSelector" class="hidden" style="max-width:800px; width:100%; margin: 0 auto 1.5rem; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:10px; padding:1.25rem;">
-                            <h4 style="font-size:0.95rem; font-weight:600; color:var(--text-main); margin-bottom:0.75rem;"><i class="fa-solid fa-gear" style="color:#3b82f6;"></i> Pilih Format Output Word (.doc):</h4>
-                            <div style="display:flex; flex-direction:column; gap:0.75rem;">
-                                <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
-                                    <input type="radio" name="wordExportMode" value="hybrid-layout" checked style="margin-top:3px;">
-                                    <div>
-                                        <strong style="font-size:0.9rem; color:#60a5fa;">⭐ Tata Letak Identik (Teks Diedit + Gambar & Tanda Tangan Asli) - REKOMENDASI</strong>
-                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Menggabungkan teks yang bisa diedit (tulisan & judul) dengan seluruh foto citra drone, peta, dan tanda tangan pada posisi yang 100% persis seperti PDF asli!</p>
-                                    </div>
-                                </label>
-                                <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
-                                    <input type="radio" name="wordExportMode" value="smart-text" style="margin-top:3px;">
-                                    <div>
-                                        <strong style="font-size:0.9rem; color:var(--text-main);">Teks & Judul Saja (Tanpa Gambar)</strong>
-                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Hanya mengambil teks tulisan kalimat dan judul saja (cocok untuk menyalin kutipan teks murni dengan cepat).</p>
-                                    </div>
-                                </label>
-                                <label style="display:flex; align-items:flex-start; gap:0.75rem; cursor:pointer;">
-                                    <input type="radio" name="wordExportMode" value="visual-snapshot" style="margin-top:3px;">
-                                    <div>
-                                        <strong style="font-size:0.9rem; color:var(--text-main);">Salinan Visual 100% Persis (Visual Snapshot / Gambar Halaman)</strong>
-                                        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Menjadikan setiap halaman dokumen sebagai foto visual utuh (cocok untuk arsip cetak atau dokumen yang tidak perlu disunting teksnya).</p>
-                                    </div>
-                                </label>
-                            </div>
                         </div>
                         <div id="converterDropZone" class="upload-zone" style="max-width:800px; width:100%; margin: 0 auto 1.5rem;" onclick="document.getElementById('converterFileInput').click();">
                             <i class="fa-solid fa-cloud-arrow-up upload-icon-pulse" style="color:#8b5cf6;"></i>
@@ -483,7 +451,7 @@
                     <div class="step-num">1</div>
                     <div class="step-text">
                         <h4>Pilih Alat yang Diinginkan di Menu Utama</h4>
-                        <p>PDF Editor Pro menyediakan 7 alat lengkap: Edit PDF & Tanda Tangan, Gabung PDF, Hapus Halaman, Kompres PDF, PDF ke Gambar, Gambar ke PDF, dan PDF ke Word (.doc).</p>
+                        <p>PDF Editor Pro menyediakan 6 alat lengkap: Edit PDF & Tanda Tangan, Gabung PDF, Hapus Halaman, Kompres PDF, PDF ke Gambar, dan Gambar ke PDF.</p>
                     </div>
                 </div>
                 <div class="guide-step">
@@ -503,6 +471,30 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="document.getElementById('helpModalBackdrop').classList.add('hidden');">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DONASI QR -->
+    <div id="donateModalBackdrop" class="modal-backdrop hidden">
+        <div class="modal-dialog" style="max-width: 420px; text-align: center;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-heart" style="color: #ec4899;"></i> Dukung & Donasi</h3>
+                <button id="closeDonateModalBtn" class="btn-close-modal" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                    Scan QR Code di bawah ini untuk mendukung pengembangan dan pemeliharaan aplikasi ini:
+                </p>
+                <div style="background: #ffffff; padding: 1rem; border-radius: 14px; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 1.2rem;">
+                    <img src="assets/qrdonate.png" alt="QR Donate" style="max-width: 260px; width: 100%; height: auto; display: block; border-radius: 8px;">
+                </div>
+                <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">
+                    Terima kasih atas dukungan Anda! 🙏
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn-primary" onclick="document.getElementById('donateModalBackdrop').classList.add('hidden');">Tutup</button>
             </div>
         </div>
     </div>

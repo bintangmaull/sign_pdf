@@ -105,6 +105,17 @@ function setupGlobalControls() {
         helpBackdrop.addEventListener('click', (e) => { if (e.target === helpBackdrop) helpBackdrop.classList.add('hidden'); });
     }
     
+    // Donate Modal
+    const donateBtn = document.getElementById('donateBtn');
+    const donateBackdrop = document.getElementById('donateModalBackdrop');
+    const closeDonate = document.getElementById('closeDonateModalBtn');
+    
+    if (donateBtn && donateBackdrop) {
+        donateBtn.addEventListener('click', () => donateBackdrop.classList.remove('hidden'));
+        if (closeDonate) closeDonate.addEventListener('click', () => donateBackdrop.classList.add('hidden'));
+        donateBackdrop.addEventListener('click', (e) => { if (e.target === donateBackdrop) donateBackdrop.classList.add('hidden'); });
+    }
+    
     // Mencegah recursion event bubbling pada semua input file saat upload zone diklik
     document.querySelectorAll('input[type="file"]').forEach(input => {
         input.addEventListener('click', (e) => e.stopPropagation());
